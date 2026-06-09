@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
-import { ExerciseEntry } from '../types';
+import type { ExerciseEntry } from '../types';
 
 const weatherIcons = {
   sunny: '☀️',

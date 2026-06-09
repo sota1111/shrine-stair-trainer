@@ -1,4 +1,4 @@
-import { TrainingRecord, ExerciseType, WeatherCondition, RoadCondition } from '../types';
+import type { TrainingRecord, ExerciseType, WeatherCondition, RoadCondition, ExerciseEntry } from '../types';
 
 const generateSampleData = (): TrainingRecord[] => {
   const records: TrainingRecord[] = [];
@@ -22,7 +22,7 @@ const generateSampleData = (): TrainingRecord[] => {
       weather = 'cloudy';
     }
 
-    const exercises: any[] = [];
+    const exercises: ExerciseEntry[] = [];
     const isRainy = weather === 'rainy' || weather === 'light-rain' || roadCondition !== 'dry';
 
     if (dayOfWeek === '日') {

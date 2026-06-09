@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrainingRecord } from '../types';
+import type { TrainingRecord } from '../types';
 import { sampleData } from '../data/sampleData';
 
 const STORAGE_KEY = 'shrine-stair-trainer-records';

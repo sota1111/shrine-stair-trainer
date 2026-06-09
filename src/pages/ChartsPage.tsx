@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
 } from 'recharts';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
+import type { TrainingRecord } from '../types';
 
 const ChartsPage: React.FC = () => {
   const { records } = useTrainingRecords();
@@ -79,7 +80,7 @@ const ChartsPage: React.FC = () => {
     const latest = dashRecords[dashRecords.length - 1];
     const prev = dashRecords[dashRecords.length - 2];
     
-    const getBest = (r: any) => Math.min(...r.exercises.find((ex: any) => ex.type === '70段ダッシュ').sets.map((s: any) => s.timeSeconds));
+    const getBest = (r: TrainingRecord) => Math.min(...r.exercises.find((ex) => ex.type === '70段ダッシュ')!.sets.map((s) => s.timeSeconds));
     
     const latestBest = getBest(latest);
     const prevBest = getBest(prev);

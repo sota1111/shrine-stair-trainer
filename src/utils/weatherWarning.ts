@@ -1,4 +1,4 @@
-import { WeatherCondition, RoadCondition, ExerciseType } from '../types';
+import type { WeatherCondition, RoadCondition, ExerciseType } from '../types';
 
 const DANGEROUS_EXERCISES: ExerciseType[] = ['一段飛ばし', '二段飛ばし'];
 const BAD_WEATHER: WeatherCondition[] = ['rainy', 'light-rain'];
