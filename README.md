@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# 神社階段トレーニング記録アプリ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## アプリ概要
 
-Currently, two official plugins are available:
+保育園送迎後に実施する神社の階段約70段ダッシュを記録・可視化するWebアプリ。
+「30秒間に発揮できる身体能力の最大化」を目的とする。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 対象トレーニング
 
-## React Compiler
+- 神社の階段 約70段
+- トレーニング時間: 約5分
+- 実施タイミング: 保育園送迎後
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 起動方法
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+ブラウザで http://localhost:5173 にアクセス。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 画面構成
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| 画面 | URL | 説明 |
+|------|-----|------|
+| 記録入力 | /record | トレーニング記録を入力 |
+| 履歴一覧 | /history | 過去の記録一覧 |
+| グラフ | /charts | タイム・疲労感等の推移グラフ |
+| 週間メニュー | /menu | 推奨週間スケジュール |
+
+## 記録項目
+
+| 項目 | 説明 |
+|------|------|
+| 実施日 | トレーニング日 |
+| 曜日 | 自動計算（変更可） |
+| 天気 | sunny / cloudy / rainy / light-rain |
+| 路面状態 | dry / wet / rainy / slippery |
+| 種目 | 70段ダッシュ / 一段ずつ / 一段飛ばし / 二段飛ばし / 軽め / 屋内ジャンプ / 休養 |
+| 本数・タイム | 各セットのタイム（秒） |
+| 主観的強度 | 1〜10 |
+| 疲労感 | 1〜10 |
+| 痛みの有無 | あり / なし |
+| メモ | 自由記述 |
+
+## 雨天時の制御仕様
+
+天気が `rainy` / `light-rain` または路面状態が `wet` / `rainy` / `slippery` の場合:
+
+- **一段飛ばし** および **二段飛ばし** は推奨しない
+- 警告バナーを表示
+- 代替推奨メニュー: 一段ずつ、軽め、屋内ジャンプ、休養
+
+## データ保存
+
+- ブラウザの localStorage に保存
+- 初回起動時はサンプルデータを自動読み込み
+
+## 今後追加したい機能
+
+- スマホ入力最適化
+- 天気API連携（現在地の天気を自動取得）
+- Google Fit / Apple Health 連携
+- GPS不要の手動記録
+- タイム計測ボタン
+- CSVエクスポート
+- 月次レポート生成
