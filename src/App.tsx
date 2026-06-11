@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import RecordPage from './pages/RecordPage';
 import HistoryPage from './pages/HistoryPage';

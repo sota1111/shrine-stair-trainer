@@ -1,12 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { useState, type ReactNode } from 'react';
+import { AuthContext } from './authContextValue';
 
 const STORAGE_KEY = 'shrine_auth_token';
 
@@ -35,10 +28,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
 }
