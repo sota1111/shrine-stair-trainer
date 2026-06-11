@@ -36,9 +36,62 @@ const HistoryPage: React.FC = () => {
     return 'var(--color-danger)';
   };
 
+  const exportCSV = () => {
+    const header = 'date,dayOfWeek,weather,roadCondition,exerciseType,setNumber,timeSeconds,perceivedExertion,fatigue,hasPain,memo';
+    const rows: string[] = [];
+    sortedRecords.forEach(record => {
+      if (record.exercises.length === 0) {
+        rows.push([
+          record.date,
+          record.dayOfWeek,
+          record.weather,
+          record.roadCondition,
+          '',
+          '',
+          '',
+          record.perceivedExertion,
+          record.fatigue,
+          record.hasPain ? '1' : '0',
+          `"${(record.memo || '').replace(/"/g, '""')}"`,
+        ].join(','));
+      } else {
+        record.exercises.forEach(ex => {
+          ex.sets.forEach(set => {
+            rows.push([
+              record.date,
+              record.dayOfWeek,
+              record.weather,
+              record.roadCondition,
+              ex.type,
+              set.setNumber,
+              set.timeSeconds,
+              record.perceivedExertion,
+              record.fatigue,
+              record.hasPain ? '1' : '0',
+              `"${(record.memo || '').replace(/"/g, '""')}"`,
+            ].join(','));
+          });
+        });
+      }
+    });
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `shrine-stair-training-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="history-page">
-      <h2>📋 記録履歴</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h2 style={{ margin: 0 }}>📋 記録履歴</h2>
+        <button className="btn btn-secondary btn-sm" onClick={exportCSV}>
+          📥 CSVエクスポート
+        </button>
+      </div>
       {sortedRecords.length === 0 ? (
         <p>記録がありません</p>
       ) : (
