@@ -20,6 +20,23 @@ npm run dev
 
 ブラウザで http://localhost:5173 にアクセス。
 
+## 認証情報なし開発クイックスタート
+
+**このアプリはサーバー・APIキー・データベース不要で動作します。**
+
+```bash
+git clone https://github.com/sota1111/shrine-stair-trainer.git
+cd shrine-stair-trainer
+npm install
+npm run dev
+```
+
+ブラウザで http://localhost:5173 にアクセス。
+
+- すべてのデータはブラウザの localStorage に保存されます
+- 初回起動時はサンプルデータが自動読み込みされます
+- Cloud Run / Docker は不要です（静的フロントエンドのみのアプリです）
+
 ## 画面構成
 
 | 画面 | URL | 説明 |
@@ -64,5 +81,4 @@ npm run dev
 - Google Fit / Apple Health 連携
 - GPS不要の手動記録
 - タイム計測ボタン
-- CSVエクスポート
 - 月次レポート生成
