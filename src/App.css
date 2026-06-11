@@ -141,3 +141,52 @@ body {
 }
 .analysis-title { font-weight: 700; color: var(--color-success); margin-bottom: 8px; }
 .analysis-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.9rem; }
+
+/* Login page */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 16px;
+}
+
+.login-card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-card h2 {
+  margin: 0 0 24px 0;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+/* Header layout with logout button */
+.app-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.logout-btn {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: var(--radius);
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.logout-btn:hover {
+  background: rgba(255,255,255,0.3);
+}

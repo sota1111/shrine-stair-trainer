@@ -14,28 +14,22 @@
 ## 起動方法
 
 ```bash
+cp .env.example .env
+# .env を開き VITE_AUTH_PASSWORD に任意のパスワードを設定
 npm install
 npm run dev
 ```
 
 ブラウザで http://localhost:5173 にアクセス。
 
-## 認証情報なし開発クイックスタート
+## 認証について
 
-**このアプリはサーバー・APIキー・データベース不要で動作します。**
+個人利用向けのシンプルなパスワード認証を実装しています。
 
-```bash
-git clone https://github.com/sota1111/shrine-stair-trainer.git
-cd shrine-stair-trainer
-npm install
-npm run dev
-```
-
-ブラウザで http://localhost:5173 にアクセス。
-
-- すべてのデータはブラウザの localStorage に保存されます
-- 初回起動時はサンプルデータが自動読み込みされます
-- Cloud Run / Docker は不要です（静的フロントエンドのみのアプリです）
+- パスワードは `.env` の `VITE_AUTH_PASSWORD` で設定します
+- 認証状態はブラウザの localStorage に保存されます
+- ユーザー登録・複数ユーザー管理機能は存在しません
+- パスワードはソースコードに含まれません（`.env` ファイルは git 管理外）
 
 ## 画面構成
 
