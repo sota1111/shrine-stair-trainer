@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+ARG VITE_AUTH_PASSWORD
+ENV VITE_AUTH_PASSWORD=${VITE_AUTH_PASSWORD}
 RUN npm run build
 
 # Production stage
