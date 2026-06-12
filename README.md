@@ -77,3 +77,36 @@ npm run dev
 - GPS不要の手動記録
 - タイム計測ボタン
 - 月次レポート生成
+
+## GCP デプロイ準備
+
+### 概要
+
+このアプリは React (Vite) のみで構成されており、静的サイトとして GCP にホストできます。
+
+### コンテナ化
+
+Docker を使ってビルド・実行できます:
+
+```bash
+docker build -t shrine-stair-trainer .
+docker run -p 8080:8080 --env-file .env shrine-stair-trainer
+```
+
+### GCP 実行環境
+
+- **推奨**: Cloud Run (コンテナとしてデプロイ)
+- ポート: `8080` (Cloud Run のデフォルト)
+- 環境変数: `.env.example` を参照し、Cloud Run の環境変数設定または Secret Manager で管理
+
+### 環境変数
+
+| 変数名 | 説明 |
+|--------|------|
+| VITE_AUTH_PASSWORD | ログイン用パスワード（Secret Manager 推奨） |
+
+### 注意事項
+
+- 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
+- 認証情報は Cloud Run の環境変数設定または Secret Manager で管理してください
+- データは localStorage に保存されており、GCP 側のデータ永続化は不要
