@@ -110,3 +110,27 @@ docker run -p 8080:8080 --env-file .env shrine-stair-trainer
 - 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
 - 認証情報は Cloud Run の環境変数設定または Secret Manager で管理してください
 - データは localStorage に保存されており、GCP 側のデータ永続化は不要
+
+## Cloud Run へのデプロイ
+
+### 前提条件
+
+- `gcloud auth login` 済み
+- GCP プロジェクトで Cloud Build API と Cloud Run API が有効になっていること
+  ```bash
+  gcloud services enable run.googleapis.com cloudbuild.googleapis.com --project=YOUR_PROJECT_ID
+  ```
+
+### デプロイ手順
+
+```bash
+GCP_PROJECT_ID=your-project-id \
+VITE_AUTH_PASSWORD=your-secret-password \
+bash scripts/deploy-cloudrun.sh
+```
+
+### 注意事項
+
+- `VITE_AUTH_PASSWORD` はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
+- デプロイのたびに同じパスワードを指定してください
+- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）で作成されます

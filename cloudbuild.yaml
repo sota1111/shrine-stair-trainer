@@ -1,0 +1,16 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_AUTH_PASSWORD=${_VITE_AUTH_PASSWORD}'
+      - '-t'
+      - '${_IMAGE}'
+      - '.'
+images:
+  - '${_IMAGE}'
+substitutions:
+  _IMAGE: 'gcr.io/${PROJECT_ID}/shrine-stair-trainer'
+  _VITE_AUTH_PASSWORD: ''
+options:
+  logging: CLOUD_LOGGING_ONLY
