@@ -23,6 +23,20 @@ npm run dev
 ブラウザで http://localhost:5173 にアクセス。
 
 ## 認証について
+### GCP Secret Manager セットアップ
+
+本番環境（Cloud Run）では機密情報を Secret Manager で管理します。初回デプロイ前に以下のコマンドでシークレットを作成してください。
+
+```bash
+# パスワードの作成
+echo -n "your-password" | gcloud secrets create shrine-trainer-auth-password --data-file=- --project=YOUR_PROJECT_ID
+
+# Cloud Run サービスアカウントへの権限付与
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+  --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+```
+
 
 個人利用向けのシンプルなパスワード認証を実装しています。
 
