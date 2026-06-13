@@ -37,7 +37,15 @@ gcloud builds submit . \
   --substitutions="_VITE_AUTH_PASSWORD=${VITE_AUTH_PASSWORD}" \
   --timeout=600s
 
+
+# Secret Manager: 初回デプロイ前に以下を実行してください
+# echo -n "value" | gcloud secrets create shrine-trainer-auth-password --data-file=- --project=$PROJECT_ID
+# gcloud projects add-iam-policy-binding $PROJECT_ID \
+#   --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+#   --role="roles/secretmanager.secretAccessor"
+
 gcloud run deploy "${SERVICE_NAME}" \
+  --set-secrets="VITE_AUTH_PASSWORD=shrine-trainer-auth-password:latest" \
   --image="${IMAGE}:latest" \
   --project="${PROJECT_ID}" \
   --region="${REGION}" \
