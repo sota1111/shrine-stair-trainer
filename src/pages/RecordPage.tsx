@@ -91,8 +91,16 @@ const RecordPage: React.FC = () => {
   const isConditionDangerous = isDangerousCondition(weather, roadCondition);
 
   return (
-    <div className="record-page">
-      <h2>📝 トレーニング記録</h2>
+    <div className="record-page container">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h2>📝 トレーニング記録</h2>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <button type="button" className="btn btn-secondary" style={{ width: '100%', minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => navigate('/timer')}>
+          ⏱️ タイム計測して記録する
+        </button>
+      </div>
 
       {isConditionDangerous && (
         <div className="warning-box">
@@ -101,49 +109,67 @@ const RecordPage: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="card">
-        <div className="form-group">
-          <label>実施日</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-            曜日: {calculateDayOfWeek(date)}
-          </span>
-        </div>
+      <form onSubmit={handleSubmit}>
+        <section className="card">
+          <div className="form-group">
+            <label>実施日</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
+              曜日: {calculateDayOfWeek(date)}
+            </span>
+          </div>
 
-        <div className="form-group">
-          <label>天気</label>
-          <select value={weather} onChange={(e) => setWeather(e.target.value as WeatherCondition)}>
-            <option value="sunny">sunny ☀️</option>
-            <option value="cloudy">cloudy ☁️</option>
-            <option value="rainy">rainy 🌧️</option>
-            <option value="light-rain">light-rain 🌦️</option>
-          </select>
-        </div>
+          <div className="form-group">
+            <label>天気</label>
+            <div className="quick-select-group">
+              {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map(w => (
+                <button
+                  key={w}
+                  type="button"
+                  className={`quick-select-btn ${weather === w ? 'active' : ''}`}
+                  onClick={() => setWeather(w)}
+                >
+                  {w === 'sunny' ? '☀️ 晴' : w === 'cloudy' ? '☁️ 曇' : w === 'rainy' ? '🌧️ 雨' : '🌦️ 小雨'}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <div className="form-group">
-          <label>路面状態</label>
-          <select value={roadCondition} onChange={(e) => setRoadCondition(e.target.value as RoadCondition)}>
-            <option value="dry">dry</option>
-            <option value="wet">wet</option>
-            <option value="rainy">rainy</option>
-            <option value="slippery">slippery</option>
-          </select>
-        </div>
+          <div className="form-group">
+            <label>路面状態</label>
+            <div className="quick-select-group">
+              {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map(r => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
+                  onClick={() => setRoadCondition(r)}
+                >
+                  {r === 'dry' ? '🟢 乾燥' : r === 'wet' ? '🔵 湿潤' : r === 'rainy' ? '💧 雨' : '⚠️ 滑る'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <div className="exercises-section">
+        <div className="exercises-section" style={{ marginTop: '20px' }}>
           <h3>種目</h3>
           {exercises.map((ex, exIdx) => (
-            <div key={exIdx} className="exercise-entry card" style={{ border: '1px solid #eee', marginBottom: '10px' }}>
+            <div key={exIdx} className="exercise-entry card" style={{ marginBottom: '16px' }}>
               <div className="form-group">
                 <label>種目名</label>
-                <select 
-                  value={ex.type} 
-                  onChange={(e) => handleExerciseTypeChange(exIdx, e.target.value as ExerciseType)}
-                >
+                <div className="quick-select-group" style={{ flexWrap: 'wrap' }}>
                   {EXERCISE_TYPES.map(t => (
-                    <option key={t} value={t}>{t}</option>
+                    <button
+                      key={t}
+                      type="button"
+                      className={`quick-select-btn ${ex.type === t ? 'active' : ''}`}
+                      onClick={() => handleExerciseTypeChange(exIdx, t)}
+                    >
+                      {t}
+                    </button>
                   ))}
-                </select>
+                </div>
                 {isConditionDangerous && isDangerousExercise(ex.type) && (
                   <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px' }}>
                     ⚠️ 危険なコンディションです
@@ -153,88 +179,92 @@ const RecordPage: React.FC = () => {
 
               <div className="sets-list">
                 {ex.sets.map((set, setIdx) => (
-                  <div key={setIdx} className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label style={{ margin: 0, minWidth: '40px' }}>{set.setNumber}本目</label>
+                  <div key={setIdx} className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <label style={{ margin: 0, minWidth: '50px' }}>{set.setNumber}本目</label>
                     <input 
                       type="number" 
                       step="0.1" 
                       value={set.timeSeconds} 
                       onChange={(e) => handleSetTimeChange(exIdx, setIdx, parseFloat(e.target.value))}
-                      style={{ flex: 1 }}
+                      style={{ flex: 1, padding: '10px', fontSize: '1rem' }}
                     />
-                    <span style={{ fontSize: '0.9rem' }}>秒</span>
+                    <span style={{ fontSize: '1rem' }}>秒</span>
                     <button 
                       type="button" 
                       className="btn btn-danger btn-sm" 
+                      style={{ minHeight: '44px' }}
                       onClick={() => handleRemoveSet(exIdx, setIdx)}
                     >
                       削除
                     </button>
                   </div>
                 ))}
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAddSet(exIdx)}>
-                  本追加
+                <button type="button" className="btn btn-secondary btn-sm" style={{ width: '100%', minHeight: '44px' }} onClick={() => handleAddSet(exIdx)}>
+                  ➕ 本追加
                 </button>
               </div>
-              <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                <button type="button" className="btn btn-danger btn-sm" onClick={() => handleRemoveExercise(exIdx)}>
-                  種目削除
+              <div style={{ marginTop: '12px', textAlign: 'right' }}>
+                <button type="button" className="btn btn-danger btn-sm" style={{ minHeight: '44px' }} onClick={() => handleRemoveExercise(exIdx)}>
+                  🗑️ 種目削除
                 </button>
               </div>
             </div>
           ))}
-          <button type="button" className="btn btn-secondary" onClick={handleAddExercise} style={{ width: '100%' }}>
-            ➕ 種目追加
+          <button type="button" className="btn btn-secondary" onClick={handleAddExercise} style={{ width: '100%', minHeight: '56px' }}>
+            ➕ 新しい種目を追加
           </button>
         </div>
 
-        <hr style={{ margin: '20px 0' }} />
-
-        <div className="form-group">
-          <label>主観的強度 (1-10)</label>
-          <input 
-            type="range" min="1" max="10" 
-            value={perceivedExertion} 
-            onChange={(e) => setPerceivedExertion(parseInt(e.target.value))} 
-          />
-          <div style={{ textAlign: 'center' }}>{perceivedExertion}</div>
-        </div>
-
-        <div className="form-group">
-          <label>疲労感 (1-10)</label>
-          <input 
-            type="range" min="1" max="10" 
-            value={fatigue} 
-            onChange={(e) => setFatigue(parseInt(e.target.value))} 
-          />
-          <div style={{ textAlign: 'center' }}>{fatigue}</div>
-        </div>
-
-        <div className="form-group">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <section className="card" style={{ marginTop: '20px' }}>
+          <div className="form-group">
+            <label>主観的強度 (1-10)</label>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{perceivedExertion}</div>
             <input 
-              type="checkbox" 
-              checked={hasPain} 
-              onChange={(e) => setHasPain(e.target.checked)} 
-              style={{ width: 'auto' }}
+              type="range" min="1" max="10" 
+              value={perceivedExertion} 
+              onChange={(e) => setPerceivedExertion(parseInt(e.target.value))} 
+              style={{ height: '32px', width: '100%' }}
             />
-            痛みの有無
-          </label>
-        </div>
+          </div>
 
-        <div className="form-group">
-          <label>メモ</label>
-          <textarea 
-            value={memo} 
-            onChange={(e) => setMemo(e.target.value)} 
-            rows={3}
-            placeholder="気づいたことなど"
-          />
-        </div>
+          <div className="form-group">
+            <label>疲労感 (1-10)</label>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{fatigue}</div>
+            <input 
+              type="range" min="1" max="10" 
+              value={fatigue} 
+              onChange={(e) => setFatigue(parseInt(e.target.value))} 
+              style={{ height: '32px', width: '100%' }}
+            />
+          </div>
 
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px' }}>
-          記録を保存する
-        </button>
+          <div className="form-group">
+            <label>痛みの有無</label>
+            <button
+              type="button"
+              className={`quick-select-btn ${hasPain ? 'active' : ''}`}
+              style={{ width: '100%', justifyContent: 'center', minHeight: '56px' }}
+              onClick={() => setHasPain(!hasPain)}
+            >
+              {hasPain ? '🤕 痛みあり' : '✅ 痛みなし'}
+            </button>
+          </div>
+
+          <div className="form-group">
+            <label>メモ</label>
+            <textarea 
+              value={memo} 
+              onChange={(e) => setMemo(e.target.value)} 
+              rows={3}
+              placeholder="気づいたことなど"
+              style={{ padding: '12px', fontSize: '1rem' }}
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.2rem', minHeight: '64px' }}>
+            記録を保存する
+          </button>
+        </section>
       </form>
     </div>
   );
