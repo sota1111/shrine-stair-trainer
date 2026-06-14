@@ -190,3 +190,173 @@ body {
 .logout-btn:hover {
   background: rgba(255,255,255,0.3);
 }
+
+/* Timer Page */
+.timer-page { padding: 8px 0; }
+
+.timer-display {
+  font-size: 5rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-primary);
+  padding: 24px 0;
+  letter-spacing: 2px;
+}
+
+.timer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.timer-btn-start {
+  background: var(--color-success);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0 24px;
+  min-height: 72px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+.timer-btn-stop {
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0 24px;
+  min-height: 72px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+.timer-btn-secondary {
+  background: #ecf0f1;
+  color: var(--color-text);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  min-height: 48px;
+}
+
+.timer-secondary-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* Quick Select Buttons */
+.quick-select-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-select-btn {
+  background: #ecf0f1;
+  color: var(--color-text);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 48px;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.quick-select-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* RPE / Fatigue Grid */
+.rpe-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.rpe-btn {
+  background: #ecf0f1;
+  color: var(--color-text);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 10px 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 48px;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.rpe-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Sets List */
+.timer-sets-list {
+  margin-bottom: 16px;
+}
+
+.timer-set-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--color-card);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  box-shadow: var(--shadow);
+  font-size: 1rem;
+}
+
+.timer-set-time {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--color-primary);
+}
+
+/* Mobile input sizes */
+@media (max-width: 600px) {
+  .form-group input, .form-group select, .form-group textarea {
+    font-size: 1rem;
+    padding: 12px;
+    min-height: 48px;
+  }
+
+  .btn {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .app-nav a {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
