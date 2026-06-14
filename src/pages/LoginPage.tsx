@@ -1,27 +1,52 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/useAuth'
 
 export default function LoginPage() {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (login(password)) {
-      navigate('/record');
-    } else {
-      setError(true);
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await login(email, password)
+      navigate('/record')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
+        setError('メールアドレスまたはパスワードが正しくありません')
+      } else if (msg.includes('auth/too-many-requests')) {
+        setError('ログイン試行が多すぎます。しばらく待ってから再試行してください')
+      } else {
+        setError('ログインに失敗しました')
+      }
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="login-page">
       <div className="login-card">
         <h2>🔐 ログイン</h2>
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">メールアドレス</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your-email@example.com"
+              required
+            />
+          </div>
           <div className="form-group">
             <label htmlFor="password">パスワード</label>
             <input
@@ -35,14 +60,14 @@ export default function LoginPage() {
           </div>
           {error && (
             <div className="danger-box">
-              パスワードが正しくありません
+              {error}
             </div>
           )}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            ログイン
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
       </div>
     </div>
-  );
+  )
 }

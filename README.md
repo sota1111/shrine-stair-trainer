@@ -23,27 +23,27 @@ npm run dev
 ブラウザで http://localhost:5173 にアクセス。
 
 ## 認証について
-### GCP Secret Manager セットアップ
 
-本番環境（Cloud Run）では機密情報を Secret Manager で管理します。初回デプロイ前に以下のコマンドでシークレットを作成してください。
+Firebase Authentication (Email/Password) を使用しています。
 
-```bash
-# パスワードの作成
-echo -n "your-password" | gcloud secrets create shrine-trainer-auth-password --data-file=- --project=YOUR_PROJECT_ID
+- Firebase Console に登録されたユーザーのみログイン可能です
+- 認証状態は Firebase SDK によって管理されます
+- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。そのため、`ALLOWED_USER_EMAILS` 等によるサーバー側でのメールアドレス制限は実装されていません。認証の制限は Firebase 側の設定（ユーザー登録の有無）に依存します。
+- 旧パスワード認証（`VITE_AUTH_PASSWORD`）は廃止されました
 
-# Cloud Run サービスアカウントへの権限付与
-gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-  --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
+### Firebase 設定
+
+`.env` ファイルに以下の設定が必要です（`.env.example` 参照）:
+
+```
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
 
+これらの値は Firebase Console > プロジェクト設定 > 全般 > マイアプリ から取得できます。
 
-個人利用向けのシンプルなパスワード認証を実装しています。
-
-- パスワードは `.env` の `VITE_AUTH_PASSWORD` で設定します
-- 認証状態はブラウザの localStorage に保存されます
-- ユーザー登録・複数ユーザー管理機能は存在しません
-- パスワードはソースコードに含まれません（`.env` ファイルは git 管理外）
 
 ## 画面構成
 
@@ -160,12 +160,15 @@ docker run -p 8080:8080 --env-file .env shrine-stair-trainer
 
 | 変数名 | 説明 |
 |--------|------|
-| VITE_AUTH_PASSWORD | ログイン用パスワード（Secret Manager 推奨） |
+| VITE_FIREBASE_API_KEY | Firebase API キー |
+| VITE_FIREBASE_AUTH_DOMAIN | Firebase Auth ドメイン |
+| VITE_FIREBASE_PROJECT_ID | Firebase プロジェクト ID |
+| VITE_FIREBASE_APP_ID | Firebase アプリ ID |
 
 ### 注意事項
 
 - 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
-- 認証情報は Cloud Run の環境変数設定または Secret Manager で管理してください
+- 認証情報は Firebase Authentication で管理されます
 - データは localStorage に保存されており、GCP 側のデータ永続化は不要
 
 ## Cloud Run へのデプロイ
@@ -182,12 +185,10 @@ docker run -p 8080:8080 --env-file .env shrine-stair-trainer
 
 ```bash
 GCP_PROJECT_ID=your-project-id \
-VITE_AUTH_PASSWORD=your-secret-password \
 bash scripts/deploy-cloudrun.sh
 ```
 
 ### 注意事項
 
-- `VITE_AUTH_PASSWORD` はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
-- デプロイのたびに同じパスワードを指定してください
+- Firebase の設定値はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
 - Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）で作成されます

@@ -1,31 +1,42 @@
-import { useState, type ReactNode } from 'react';
-import { AuthContext } from './authContextValue';
-
-const STORAGE_KEY = 'shrine_auth_token';
+import { useState, useEffect, type ReactNode } from 'react'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../lib/firebase'
+import { AuthContext } from './authContextValue'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    () => localStorage.getItem(STORAGE_KEY) === 'authenticated'
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [email, setEmail] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = (password: string): boolean => {
-    const correct = import.meta.env.VITE_AUTH_PASSWORD;
-    if (password === correct) {
-      localStorage.setItem(STORAGE_KEY, 'authenticated');
-      setIsAuthenticated(true);
-      return true;
-    }
-    return false;
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true)
+        setEmail(user.email)
+      } else {
+        setIsAuthenticated(false)
+        setEmail(null)
+      }
+      setLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
 
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setIsAuthenticated(false);
-  };
+  const login = async (emailAddr: string, password: string) => {
+    await signInWithEmailAndPassword(auth, emailAddr, password)
+  }
+
+  const logout = async () => {
+    await signOut(auth)
+  }
+
+  if (loading) {
+    return null
+  }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, email, login, logout }}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
