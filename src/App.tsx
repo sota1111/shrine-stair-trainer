@@ -2,12 +2,14 @@ import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-do
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
+import HomePage from './pages/HomePage';
 import RecordPage from './pages/RecordPage';
 import TimerPage from './pages/TimerPage';
 import HistoryPage from './pages/HistoryPage';
 import ChartsPage from './pages/ChartsPage';
 import WeeklyMenuPage from './pages/WeeklyMenuPage';
 import LoginPage from './pages/LoginPage';
+import BottomNav from './components/BottomNav';
 import './App.css';
 
 function AppLayout() {
@@ -20,6 +22,7 @@ function AppLayout() {
           <div>
             <h1>⛩️ 階段トレーニング</h1>
             <nav className="app-nav">
+              <NavLink to="/home">🏠 ホーム</NavLink>
               <NavLink to="/record">📝 記録</NavLink>
               <NavLink to="/timer">⏱️ 計測</NavLink>
               <NavLink to="/history">📋 履歴</NavLink>
@@ -35,7 +38,8 @@ function AppLayout() {
       <main className="app-main">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/record" replace />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/record" element={<ProtectedRoute><RecordPage /></ProtectedRoute>} />
           <Route path="/timer" element={<ProtectedRoute><TimerPage /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
@@ -43,6 +47,7 @@ function AppLayout() {
           <Route path="/menu" element={<ProtectedRoute><WeeklyMenuPage /></ProtectedRoute>} />
         </Routes>
       </main>
+      <BottomNav />
     </div>
   );
 }

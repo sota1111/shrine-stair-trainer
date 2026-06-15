@@ -108,12 +108,32 @@ const ChartsPage: React.FC = () => {
       r.exercises.some(ex => isDangerousExercise(ex.type))
     );
 
+    // Recent best update (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentDash = dashRecords.filter(r => new Date(r.date) >= sevenDaysAgo);
+    
+    let recentBestImproved = false;
+    if (recentDash.length > 0) {
+      const bestBefore = dashRecords
+        .filter(r => new Date(r.date) < sevenDaysAgo)
+        .map(r => Math.min(...r.exercises.find(ex => ex.type === '70段ダッシュ')!.sets.map(s => s.timeSeconds)));
+      
+      const absoluteBestBefore = bestBefore.length > 0 ? Math.min(...bestBefore) : Infinity;
+      
+      recentBestImproved = recentDash.some(r => {
+        const best = Math.min(...r.exercises.find(ex => ex.type === '70段ダッシュ')!.sets.map(s => s.timeSeconds));
+        return best < absoluteBestBefore;
+      });
+    }
+
     return {
       diff,
       trend,
       fatigueWarning,
       painCount,
-      dangerousRainy
+      dangerousRainy,
+      recentBestImproved
     };
   }, [dashRecords, records]);
 
@@ -161,6 +181,11 @@ const ChartsPage: React.FC = () => {
             <Line type="monotone" dataKey="best" stroke="var(--color-primary)" strokeWidth={2} name="最速" />
           </LineChart>
         </ResponsiveContainer>
+        {dashRecords.length > 0 && (
+          <p className="chart-summary">
+            {analysis?.recentBestImproved ? '✅ 直近7日でベスト更新あり' : '📊 直近7日でベスト更新なし'}
+          </p>
+        )}
       </div>
 
       <div className="chart-container card">
@@ -200,7 +225,15 @@ const ChartsPage: React.FC = () => {
             <Line type="monotone" dataKey="fatigue" stroke="var(--color-warning)" name="疲労感" />
           </LineChart>
         </ResponsiveContainer>
+        {fatigueData.length > 0 && (
+          <p className="chart-summary">
+            {(fatigueData.slice(-7).reduce((sum, d) => sum + d.fatigue, 0) / Math.min(fatigueData.slice(-7).length, 7)) > 7
+              ? '⚠️ 直近の疲労感が高め (7+)' 
+              : '✅ 疲労感は安定しています'}
+          </p>
+        )}
       </div>
+
 
       <div className="chart-container card">
         <div className="chart-title">路面状態別平均最速タイム (秒)</div>

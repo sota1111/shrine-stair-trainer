@@ -52,39 +52,61 @@ const WeeklyMenuPage: React.FC = () => {
 
       <div className="card" style={{ marginBottom: '16px' }}>
         <h3 style={{ margin: '0 0 8px 0' }}>本日の天気・路面状態</h3>
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div className="form-group" style={{ margin: 0 }}>
             <label>天気</label>
-            <select value={weather} onChange={(e) => setWeather(e.target.value as WeatherCondition)}>
-              <option value="sunny">sunny ☀️</option>
-              <option value="cloudy">cloudy ☁️</option>
-              <option value="rainy">rainy 🌧️</option>
-              <option value="light-rain">light-rain 🌦️</option>
-            </select>
+            <div className="quick-select-group">
+              {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map(w => (
+                <button
+                  key={w}
+                  type="button"
+                  className={`quick-select-btn ${weather === w ? 'active' : ''}`}
+                  onClick={() => setWeather(w)}
+                >
+                  {w === 'sunny' ? '☀️ 晴' : w === 'cloudy' ? '☁️ 曇' : w === 'rainy' ? '🌧️ 雨' : '🌦️ 小雨'}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="form-group" style={{ margin: 0 }}>
             <label>路面状態</label>
-            <select value={roadCondition} onChange={(e) => setRoadCondition(e.target.value as RoadCondition)}>
-              <option value="dry">dry</option>
-              <option value="wet">wet</option>
-              <option value="rainy">rainy</option>
-              <option value="slippery">slippery</option>
-            </select>
+            <div className="quick-select-group">
+              {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map(r => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
+                  onClick={() => setRoadCondition(r)}
+                >
+                  {r === 'dry' ? '🟢 乾燥' : r === 'wet' ? '🔵 湿潤' : r === 'rainy' ? '💧 雨' : '⚠️ 滑る'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {isConditionDangerous && (
-        <div className="warning-box">
-          <p>⚠️ 雨天または路面不良のため、高リスク種目が代替メニューへ自動切替されます</p>
-          <p>代替推奨メニュー: {ALTERNATIVE_EXERCISES.join('、')}</p>
+        <div className="danger-box">
+          <p style={{ margin: 0, fontWeight: 700 }}>⚠️ 雨天または路面不良のため、高リスク種目が代替メニューへ自動切替されます</p>
+          <p style={{ margin: '4px 0 0 0' }}>代替推奨メニュー: {ALTERNATIVE_EXERCISES.join('、')}</p>
+        </div>
+      )}
+
+      {isConditionDangerous && todayMenu.exerciseType && isDangerousExercise(todayMenu.exerciseType) && (
+        <div className="danger-box">
+          <strong>🚨 今日のメニューは危険条件です</strong>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>
+            {todayMenu.exerciseType}は雨天・路面不良時に転倒リスクがあります。
+            代わりに{ALTERNATIVE_EXERCISES.slice(0, 3).join('、')}を選んでください。
+          </p>
         </div>
       )}
 
       <div className="card" style={{ borderLeft: '4px solid var(--color-warning)', background: '#fffdf0' }}>
         <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-warning)' }}>今日の推奨メニュー</h3>
         <div style={{ fontWeight: 700, fontSize: '1.2rem' }}>{todayMenu.menu}</div>
-        <div style={{ fontSize: '0.9rem', color: 'var(--color-muted)' }}>強度: {todayMenu.intensity} | {todayMenu.notes}</div>
+        <div style={{ fontSize: '0.9rem', color: 'var(--color-muted)' }}>強度: {todayMenu.intensity} | 約5分 | {todayMenu.notes}</div>
         {todayMenu.autoSwitchReason && (
           <div className="warning-box" style={{ marginTop: '8px', padding: '6px 10px', fontSize: '0.8rem' }}>
             ⚠️ {todayMenu.autoSwitchReason}
@@ -99,7 +121,7 @@ const WeeklyMenuPage: React.FC = () => {
             <div className="menu-day-content">
               <strong>{item.menu}</strong>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>強度: {item.intensity}</div>
-              <div className="menu-note">{item.notes}</div>
+              <div className="menu-note">約5分 | {item.notes}</div>
               {item.autoSwitchReason && (
                 <div className="warning-box" style={{ marginTop: '8px', padding: '6px 10px', fontSize: '0.8rem' }}>
                   ⚠️ {item.autoSwitchReason}
@@ -112,5 +134,6 @@ const WeeklyMenuPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default WeeklyMenuPage;

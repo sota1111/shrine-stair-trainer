@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseEntry } from '../types';
 
@@ -9,12 +9,23 @@ const weatherIcons = {
   'light-rain': '🌦️',
 };
 
+type FilterType = 'all' | 'pain' | 'rainy';
+
 const HistoryPage: React.FC = () => {
   const { records } = useTrainingRecords();
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [exerciseFilter, setExerciseFilter] = useState<string>('all');
 
   const sortedRecords = [...records].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const filteredRecords = sortedRecords.filter(r => {
+    if (filter === 'pain' && !r.hasPain) return false;
+    if (filter === 'rainy' && r.weather !== 'rainy' && r.weather !== 'light-rain') return false;
+    if (exerciseFilter !== 'all' && !r.exercises.some(ex => ex.type === exerciseFilter)) return false;
+    return true;
+  });
 
   const getBestTime = (exercises: ExerciseEntry[]) => {
     const dashExercises = exercises.filter(ex => ex.type === '70段ダッシュ');
@@ -92,10 +103,36 @@ const HistoryPage: React.FC = () => {
           📥 CSVエクスポート
         </button>
       </div>
-      {sortedRecords.length === 0 ? (
+
+      <div className="history-filters">
+        <div className="filter-group">
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>すべて</button>
+          <button className={`filter-btn ${filter === 'pain' ? 'active' : ''}`} onClick={() => setFilter('pain')}>痛みあり</button>
+          <button className={`filter-btn ${filter === 'rainy' ? 'active' : ''}`} onClick={() => setFilter('rainy')}>雨天のみ</button>
+        </div>
+        <div className="filter-group" style={{ marginTop: '8px' }}>
+          <select 
+            value={exerciseFilter}
+            onChange={(e) => setExerciseFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">全種目</option>
+            <option value="70段ダッシュ">70段ダッシュ</option>
+            <option value="一段ずつ">一段ずつ</option>
+            <option value="一段飛ばし">一段飛ばし</option>
+            <option value="二段飛ばし">二段飛ばし</option>
+            <option value="軽め">軽め</option>
+            <option value="屋内ジャンプ">屋内ジャンプ</option>
+            <option value="休養">休養</option>
+          </select>
+        </div>
+        <p className="filter-result-count">{filteredRecords.length}件</p>
+      </div>
+
+      {filteredRecords.length === 0 ? (
         <p>記録がありません</p>
       ) : (
-        sortedRecords.map(record => {
+        filteredRecords.map(record => {
           const bestTime = getBestTime(record.exercises);
           return (
             <div key={record.id} className="card">
@@ -110,6 +147,10 @@ const HistoryPage: React.FC = () => {
                   <span className={`badge badge-${record.roadCondition}`} style={{ marginLeft: '8px' }}>
                     {record.roadCondition}
                   </span>
+                  {record.hasPain && <span className="badge-pain">🤕 痛みあり</span>}
+                  {(record.weather === 'rainy' || record.weather === 'light-rain') && (
+                    <span className="badge-rainy-day">🌧️ 雨天実施</span>
+                  )}
                 </div>
                 {bestTime && (
                   <div style={{ textAlign: 'right' }}>
@@ -169,3 +210,4 @@ const HistoryPage: React.FC = () => {
 };
 
 export default HistoryPage;
+
