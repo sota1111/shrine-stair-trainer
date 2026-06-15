@@ -107,6 +107,7 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   transition: opacity 0.2s;
+  min-height: 44px;
 }
 .btn:hover { opacity: 0.85; }
 .btn-primary { background: var(--color-primary); color: white; }
