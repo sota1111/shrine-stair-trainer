@@ -15,7 +15,7 @@
 
 ```bash
 cp .env.example .env
-# .env を開き VITE_AUTH_PASSWORD に任意のパスワードを設定
+# .env に Firebase の設定値を記述
 npm install
 npm run dev
 ```
@@ -28,8 +28,10 @@ Firebase Authentication (Email/Password) を使用しています。
 
 - Firebase Console に登録されたユーザーのみログイン可能です
 - 認証状態は Firebase SDK によって管理されます
-- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。そのため、`ALLOWED_USER_EMAILS` 等によるサーバー側でのメールアドレス制限は実装されていません。認証の制限は Firebase 側の設定（ユーザー登録の有無）に依存します。
-- 旧パスワード認証（`VITE_AUTH_PASSWORD`）は廃止されました
+- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。
+  - サーバー側での Firebase ID token 検証は対象外です。
+  - Firebase Console でユーザーを手動作成することで利用者を制限します。
+  - `AUTH_SECRET` は不要です（サーバーがないため）。
 
 ### Firebase 設定
 
@@ -215,4 +217,4 @@ bash scripts/deploy-cloudrun.sh
 ### 注意事項
 
 - Firebase の設定値はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
-- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）で作成されます
+- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）でデプロイしますが、アプリ内の Firebase Auth によって画面が保護されます。
