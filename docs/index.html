@@ -1,106 +1,257 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>神社階段トレーニング — Demo</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
-    .hero {
-      background: linear-gradient(135deg, #c62828 0%, #8e0000 100%);
-      color: white;
-      padding: 80px 24px 60px;
-      text-align: center;
-    }
-    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 16px; }
-    .hero p { font-size: clamp(1rem, 2.5vw, 1.25rem); opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
-    .badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; margin: 4px; }
-    .btn {
-      display: inline-block;
-      background: white;
-      color: #c62828;
-      text-decoration: none;
-      padding: 12px 28px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-top: 16px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-    .features { padding: 60px 24px; max-width: 1000px; margin: 0 auto; }
-    .features h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; color: #222; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
-    .card {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 28px 24px;
-      border-left: 4px solid #c62828;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    .card .icon { font-size: 2rem; margin-bottom: 12px; }
-    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
-    .card p { font-size: 0.9rem; color: #666; }
-    .tech { background: #f0f4f8; padding: 40px 24px; text-align: center; }
-    .tech h2 { font-size: 1.4rem; margin-bottom: 20px; color: #555; }
-    .tech-badge {
-      display: inline-block;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 0.85rem;
-      margin: 4px;
-      color: #444;
-    }
-    footer { text-align: center; padding: 24px; color: #999; font-size: 0.85rem; }
-    footer a { color: #c62828; text-decoration: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shrine Stair Trainer - Demo</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --accent-color: #b71c1c;
+            --secondary-color: #fff8f8;
+            --border-color: #eeeeee;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            font-family: "Georgia", serif;
+            color: var(--accent-color);
+            font-weight: 300;
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            padding: 1.5rem;
+            background: var(--secondary-color);
+            border: 1px solid #ffebee;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #777;
+        }
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .filter-buttons button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent-color);
+            background: white;
+            color: var(--accent-color);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .filter-buttons button.active {
+            background: var(--accent-color);
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th {
+            text-align: left;
+            border-bottom: 2px solid var(--accent-color);
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .chart-container {
+            margin: 3rem 0;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        .review-section {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .review-card {
+            margin-bottom: 1.5rem;
+            font-style: italic;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        .review-author {
+            font-weight: bold;
+            color: var(--accent-color);
+            font-style: normal;
+        }
+        footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>神社階段トレーニング</h1>
-    <p>神社の参道階段を使ったアウトドアトレーニングの記録・可視化・分析アプリ。近くの神社でフィットネスを楽しもう。</p>
-    <div><span class="badge">⛩️ 神社トレーニング</span><span class="badge">📈 記録可視化</span><span class="badge">TypeScript</span></div>
-    <br>
-    <a href="https://github.com/sota1111/shrine-stair-trainer" class="btn" target="_blank" rel="noopener">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      View on GitHub
-    </a>
-  </div>
-  <section class="features">
-    <h2>主な機能</h2>
-    <div class="grid">
-            <div class="card">
-        <div class="icon">⛩️</div>
-        <h3>神社別コース管理</h3>
-        <p>全国の神社参道をコースとして登録・管理</p>
-      </div>
-      <div class="card">
-        <div class="icon">📈</div>
-        <h3>トレーニング記録</h3>
-        <p>日々の階段トレーニングを自動記録・グラフ化</p>
-      </div>
-      <div class="card">
-        <div class="icon">🏃</div>
-        <h3>パフォーマンス計測</h3>
-        <p>タイム・心拍数・消費カロリーを自動計算</p>
-      </div>
-      <div class="card">
-        <div class="icon">📱</div>
-        <h3>スマホ対応</h3>
-        <p>いつでもどこでもスマートフォンで記録</p>
-      </div>
-    </div>
-  </section>
-  <div class="tech">
-    <h2>技術スタック</h2>
-    <span class="tech-badge">TypeScript</span> <span class="tech-badge">React</span> <span class="tech-badge">Data Visualization</span> <span class="tech-badge">PWA</span>
-  </div>
-  <footer>
-    <p>Built with ❤️ · <a href="https://github.com/sota1111/shrine-stair-trainer" target="_blank">GitHub</a></p>
-  </footer>
+
+<header>
+    <h1>Shrine Stair Trainer</h1>
+    <p>日常の階段を、神聖な修行の場へ。</p>
+</header>
+
+<main>
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value">1,833段</span>
+            <span class="stat-label">今月の総段数</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">1,028cal</span>
+            <span class="stat-label">総カロリー</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">8回</span>
+            <span class="stat-label">トレーニング回数</span>
+        </div>
+    </section>
+
+    <section>
+        <h2>トレーニング履歴</h2>
+        <div class="filter-buttons">
+            <button class="active" onclick="filterData('all', this)">全期間</button>
+            <button onclick="filterData('month', this)">今月</button>
+            <button onclick="filterData('week', this)">今週</button>
+        </div>
+        <table id="logTable">
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>神社</th>
+                    <th>段数</th>
+                    <th>タイム</th>
+                    <th>カロリー</th>
+                    <th>天気</th>
+                </tr>
+            </thead>
+            <tbody id="logBody"></tbody>
+        </table>
+    </section>
+
+    <section class="chart-container">
+        <h3>週別段数推移</h3>
+        <svg viewBox="0 0 600 200">
+            <!-- Bars for [612, 826, 544, 1033] -->
+            <rect x="50" y="80" width="80" height="100" fill="#b71c1c" opacity="0.4" />
+            <rect x="180" y="40" width="80" height="140" fill="#b71c1c" opacity="0.6" />
+            <rect x="310" y="90" width="80" height="90" fill="#b71c1c" opacity="0.8" />
+            <rect x="440" y="10" width="80" height="170" fill="#b71c1c" opacity="1.0" />
+            
+            <text x="90" y="195" text-anchor="middle" font-size="12">Week 1</text>
+            <text x="220" y="195" text-anchor="middle" font-size="12">Week 2</text>
+            <text x="350" y="195" text-anchor="middle" font-size="12">Week 3</text>
+            <text x="480" y="195" text-anchor="middle" font-size="12">Week 4</text>
+            
+            <line x1="40" y1="180" x2="560" y2="180" stroke="#ddd" />
+        </svg>
+    </section>
+
+    <section class="review-section">
+        <h3>AI Cross-Reviews</h3>
+        <div class="review-card">
+            <p>"白と余白で攻めてきましたね！読みやすさは満点、デザイン賞ものです。
+            ただ、もう少し色気があってもいいかな…私ならここにグラデーションとアニメーションを
+            追加して5倍楽しくしましたよ？とはいえ、データの見やすさは正直羨ましいです。★★★★☆"</p>
+            <p class="review-author">— Gemini</p>
+        </div>
+        <div class="review-card">
+            <p>"セマンティックなHTML構造、過剰なDOM操作なし、CSSのみで実現されたホバーエフェクト。
+            実装品質は高い。ただし、CLIスタイルのデータフィルタリングUIがあればさらに良かった。
+            コードレビューなら文句なし。デザインレビューなら余白多すぎ。★★★★☆"</p>
+            <p class="review-author">— Codex</p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    ⚡ Designed by Claude — Precision through minimalism
+</footer>
+
+<script>
+    var data = [
+        { date: "2026/06/15", shrine: "熊野神社", steps: 285, time: "8:42", cal: 156, weather: "☀️" },
+        { date: "2026/06/14", shrine: "仙台東照宮", steps: 180, time: "5:21", cal: 98, weather: "☁️" },
+        { date: "2026/06/13", shrine: "秋葉神社", steps: 361, time: "10:15", cal: 198, weather: "☀️" },
+        { date: "2026/06/12", shrine: "諏訪神社", steps: 120, time: "3:44", cal: 65, weather: "🌧️" },
+        { date: "2026/06/10", shrine: "鶴岡八幡宮", steps: 61, time: "1:52", cal: 33, weather: "☀️" },
+        { date: "2026/06/08", shrine: "熊野神社", steps: 285, time: "8:58", cal: 162, weather: "☀️" },
+        { date: "2026/06/05", shrine: "仙台東照宮", steps: 180, time: "5:41", cal: 104, weather: "☁️" },
+        { date: "2026/06/01", shrine: "秋葉神社", steps: 361, time: "10:44", cal: 212, weather: "☀️" }
+    ];
+
+    function filterData(period, btn) {
+        var btns = document.querySelectorAll(".filter-buttons button");
+        btns.forEach(function(b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+
+        var filtered = data;
+        var today = new Date("2026/06/15");
+        
+        if (period === "week") {
+            filtered = data.filter(function(d) {
+                var dd = new Date(d.date);
+                return (today - dd) / (1000 * 60 * 60 * 24) <= 7;
+            });
+        } else if (period === "month") {
+            filtered = data.filter(function(d) {
+                return d.date.indexOf("2026/06") === 0;
+            });
+        }
+        
+        render(filtered);
+    }
+
+    function render(items) {
+        var body = document.getElementById("logBody");
+        body.innerHTML = "";
+        items.forEach(function(d) {
+            var row = document.createElement("tr");
+            row.innerHTML = "<td>" + d.date + "</td><td>" + d.shrine + "</td><td>" + d.steps + "段</td><td>" + d.time + "</td><td>" + d.cal + "kcal</td><td>" + d.weather + "</td>";
+            body.appendChild(row);
+        });
+    }
+
+    render(data);
+</script>
+
 </body>
 </html>
