@@ -1,257 +1,352 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shrine Stair Trainer - Demo</title>
-    <style>
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --accent-color: #b71c1c;
-            --secondary-color: #fff8f8;
-            --border-color: #eeeeee;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            border-bottom: 1px solid var(--border-color);
-            padding: 3rem 1rem;
-            text-align: center;
-        }
-        h1, h2, h3 {
-            font-family: "Georgia", serif;
-            color: var(--accent-color);
-            font-weight: 300;
-        }
-        main {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        .stat-card {
-            padding: 1.5rem;
-            background: var(--secondary-color);
-            border: 1px solid #ffebee;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            display: block;
-        }
-        .stat-label {
-            font-size: 0.8rem;
-            color: #777;
-        }
-        .filter-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .filter-buttons button {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--accent-color);
-            background: white;
-            color: var(--accent-color);
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .filter-buttons button.active {
-            background: var(--accent-color);
-            color: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
-        th {
-            text-align: left;
-            border-bottom: 2px solid var(--accent-color);
-            padding: 0.75rem;
-            font-size: 0.9rem;
-        }
-        td {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-        .chart-container {
-            margin: 3rem 0;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .review-section {
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-        }
-        .review-card {
-            margin-bottom: 1.5rem;
-            font-style: italic;
-            color: #555;
-            font-size: 0.9rem;
-        }
-        .review-author {
-            font-weight: bold;
-            color: var(--accent-color);
-            font-style: normal;
-        }
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            font-size: 0.8rem;
-            color: #888;
-            border-top: 1px solid var(--border-color);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏見稲荷 階段トレーニング</title>
+<style>
+  :root {
+    --bg: #1c0a00;
+    --primary: #e63946;
+    --gold: #ffd60a;
+    --text: #fdf4e3;
+    --secondary: #6b4c3b;
+    --font-heading: 'Georgia', serif;
+    --font-body: sans-serif;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+  }
+  h1, h2, h3 { font-family: var(--font-heading); }
+  
+  /* Hero Torii */
+  .hero {
+    position: relative;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #2b0f02, #1c0a00);
+    border-bottom: 2px solid var(--primary);
+    overflow: hidden;
+  }
+  .torii-silhouette {
+    position: absolute;
+    width: 200px;
+    height: 250px;
+    bottom: 0;
+    opacity: 0.15;
+  }
+  .torii-top {
+    position: absolute;
+    top: 20px; left: 0; right: 0; height: 30px;
+    background: var(--primary);
+    border-radius: 5px 5px 0 0;
+  }
+  .torii-sub {
+    position: absolute;
+    top: 60px; left: 10px; right: 10px; height: 15px;
+    background: var(--primary);
+  }
+  .torii-leg-l {
+    position: absolute;
+    top: 20px; bottom: 0; left: 30px; width: 20px;
+    background: var(--primary);
+  }
+  .torii-leg-r {
+    position: absolute;
+    top: 20px; bottom: 0; right: 30px; width: 20px;
+    background: var(--primary);
+  }
+  .hero h1 {
+    z-index: 1;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.2rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--secondary);
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 4px;
+    border-top: 3px solid var(--primary);
+  }
+  .stat-val {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin: 0.5rem 0;
+    font-family: var(--font-heading);
+  }
+  .stat-label { font-size: 0.9rem; color: #aaa; }
+
+  /* Charts & Layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+  .panel {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--secondary);
+    padding: 1.5rem;
+    border-radius: 4px;
+  }
+  .panel h2 { margin-top: 0; color: var(--primary); border-bottom: 1px solid var(--secondary); padding-bottom: 0.5rem; }
+
+  /* Weekly Chart */
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .day-label { width: 40px; color: #aaa; font-size: 0.9rem; }
+  .bar-wrap { flex: 1; height: 20px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--gold)); transition: width 1s; }
+  .bar-val { width: 50px; text-align: right; font-size: 0.9rem; font-family: var(--font-heading); }
+
+  /* Filters */
+  .filters { margin-bottom: 1rem; display: flex; gap: 0.5rem; }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--secondary);
+    color: var(--text);
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+    border-radius: 20px;
+  }
+  .filter-btn.active { background: var(--secondary); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { padding: 0.8rem 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  th { color: var(--primary); font-family: var(--font-heading); }
+
+  /* Badges */
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #332;
+    border: 2px solid #554;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .badge.unlocked {
+    background: radial-gradient(circle, var(--gold) 0%, #b8860b 100%);
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 214, 10, 0.4);
+  }
+  .badge:hover { transform: scale(1.1); }
+  .badge::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -30px;
+    background: rgba(0,0,0,0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .badge:hover::after { opacity: 1; }
+
+  /* Details */
+  details {
+    margin-top: 3rem;
+    padding: 1rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--secondary);
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  summary { cursor: pointer; font-weight: bold; }
+
+</style>
 </head>
 <body>
+  <div class="hero">
+    <div class="torii-silhouette">
+      <div class="torii-top"></div>
+      <div class="torii-sub"></div>
+      <div class="torii-leg-l"></div>
+      <div class="torii-leg-r"></div>
+    </div>
+    <h1>伏見稲荷 階段トレーニング</h1>
+  </div>
 
-<header>
-    <h1>Shrine Stair Trainer</h1>
-    <p>日常の階段を、神聖な修行の場へ。</p>
-</header>
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">今日の段数</div>
+        <div class="stat-val">1,250</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">累計 (10,000段目標)</div>
+        <div class="stat-val">8,400</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">平均タイム</div>
+        <div class="stat-val">24m</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">達成率</div>
+        <div class="stat-val" style="color: var(--primary);">84%</div>
+      </div>
+    </div>
 
-<main>
-    <section class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-value">1,833段</span>
-            <span class="stat-label">今月の総段数</span>
+    <div class="main-grid">
+      <div class="panel">
+        <h2>トレーニング記録</h2>
+        <div class="filters">
+          <button class="filter-btn" onclick="filter('today')">今日</button>
+          <button class="filter-btn active" onclick="filter('week')">今週</button>
+          <button class="filter-btn" onclick="filter('month')">今月</button>
+          <button class="filter-btn" onclick="filter('all')">全期間</button>
         </div>
-        <div class="stat-card">
-            <span class="stat-value">1,028cal</span>
-            <span class="stat-label">総カロリー</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">8回</span>
-            <span class="stat-label">トレーニング回数</span>
-        </div>
-    </section>
-
-    <section>
-        <h2>トレーニング履歴</h2>
-        <div class="filter-buttons">
-            <button class="active" onclick="filterData('all', this)">全期間</button>
-            <button onclick="filterData('month', this)">今月</button>
-            <button onclick="filterData('week', this)">今週</button>
-        </div>
-        <table id="logTable">
-            <thead>
-                <tr>
-                    <th>日付</th>
-                    <th>神社</th>
-                    <th>段数</th>
-                    <th>タイム</th>
-                    <th>カロリー</th>
-                    <th>天気</th>
-                </tr>
-            </thead>
-            <tbody id="logBody"></tbody>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Steps</th>
+              <th>Elevation</th>
+              <th>Time</th>
+              <th>Calories</th>
+              <th>Record</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+          </tbody>
         </table>
-    </section>
+      </div>
 
-    <section class="chart-container">
-        <h3>週別段数推移</h3>
-        <svg viewBox="0 0 600 200">
-            <!-- Bars for [612, 826, 544, 1033] -->
-            <rect x="50" y="80" width="80" height="100" fill="#b71c1c" opacity="0.4" />
-            <rect x="180" y="40" width="80" height="140" fill="#b71c1c" opacity="0.6" />
-            <rect x="310" y="90" width="80" height="90" fill="#b71c1c" opacity="0.8" />
-            <rect x="440" y="10" width="80" height="170" fill="#b71c1c" opacity="1.0" />
-            
-            <text x="90" y="195" text-anchor="middle" font-size="12">Week 1</text>
-            <text x="220" y="195" text-anchor="middle" font-size="12">Week 2</text>
-            <text x="350" y="195" text-anchor="middle" font-size="12">Week 3</text>
-            <text x="480" y="195" text-anchor="middle" font-size="12">Week 4</text>
-            
-            <line x1="40" y1="180" x2="560" y2="180" stroke="#ddd" />
-        </svg>
-    </section>
-
-    <section class="review-section">
-        <h3>AI Cross-Reviews</h3>
-        <div class="review-card">
-            <p>"白と余白で攻めてきましたね！読みやすさは満点、デザイン賞ものです。
-            ただ、もう少し色気があってもいいかな…私ならここにグラデーションとアニメーションを
-            追加して5倍楽しくしましたよ？とはいえ、データの見やすさは正直羨ましいです。★★★★☆"</p>
-            <p class="review-author">— Gemini</p>
+      <div>
+        <div class="panel" style="margin-bottom: 2rem;">
+          <h2>週間プログレス</h2>
+          <div class="bar-chart" id="weekly-chart">
+          </div>
         </div>
-        <div class="review-card">
-            <p>"セマンティックなHTML構造、過剰なDOM操作なし、CSSのみで実現されたホバーエフェクト。
-            実装品質は高い。ただし、CLIスタイルのデータフィルタリングUIがあればさらに良かった。
-            コードレビューなら文句なし。デザインレビューなら余白多すぎ。★★★★☆"</p>
-            <p class="review-author">— Codex</p>
+        
+        <div class="panel">
+          <h2>実績バッジ</h2>
+          <div class="badges">
+            <div class="badge unlocked" data-tooltip="初登頂: 2023/10/01">🦊</div>
+            <div class="badge unlocked" data-tooltip="累計5000段: 2023/10/15">🏮</div>
+            <div class="badge unlocked" data-tooltip="3日連続: 2023/10/20">⛩️</div>
+            <div class="badge" data-tooltip="未達成: 累計10000段">⛰️</div>
+            <div class="badge" data-tooltip="未達成: 1日2000段">🔥</div>
+          </div>
         </div>
-    </section>
-</main>
-
-<footer>
-    ⚡ Designed by Claude — Precision through minimalism
-</footer>
+      </div>
+    </div>
+    
+    <details>
+      <summary>🤖 Design Credits & AI Reviews</summary>
+      <div style="margin-top:0.75rem; color:#ccc;">
+        <p><strong>Designed by Gemini</strong></p>
+        <p><strong>Gemini's design note:</strong> 「鳥居の赤と金は精神性と達成感を同時に表現します。階段を登るたびに積み上がるデータを鳥居のように縦に並べることで、トレーニングが"巡礼"のように感じられるUIを目指しました。機能美とは用途の物語をデザインに宿すことだと思います。」</p>
+        <p><strong>Claude's review:</strong> 「鳥居シルエットのCSSオンリー実装は巧み。ただ数値密度が高いので、最重要指標（今日の段数）はもう一段大きくしてもいい。」</p>
+        <p><strong>Codex's review:</strong> 「週次チャートのデータ構造が明快で、フィルタロジックも単純。保守性が高い実装になっている。」</p>
+      </div>
+    </details>
+  </div>
 
 <script>
-    var data = [
-        { date: "2026/06/15", shrine: "熊野神社", steps: 285, time: "8:42", cal: 156, weather: "☀️" },
-        { date: "2026/06/14", shrine: "仙台東照宮", steps: 180, time: "5:21", cal: 98, weather: "☁️" },
-        { date: "2026/06/13", shrine: "秋葉神社", steps: 361, time: "10:15", cal: 198, weather: "☀️" },
-        { date: "2026/06/12", shrine: "諏訪神社", steps: 120, time: "3:44", cal: 65, weather: "🌧️" },
-        { date: "2026/06/10", shrine: "鶴岡八幡宮", steps: 61, time: "1:52", cal: 33, weather: "☀️" },
-        { date: "2026/06/08", shrine: "熊野神社", steps: 285, time: "8:58", cal: 162, weather: "☀️" },
-        { date: "2026/06/05", shrine: "仙台東照宮", steps: 180, time: "5:41", cal: 104, weather: "☁️" },
-        { date: "2026/06/01", shrine: "秋葉神社", steps: 361, time: "10:44", cal: 212, weather: "☀️" }
-    ];
+  const logs = [
+    { date: '2023-10-24', steps: 1250, elev: '200m', time: '22:15', cal: 310, rec: '🏃' },
+    { date: '2023-10-23', steps: 800, elev: '120m', time: '15:30', cal: 200, rec: '' },
+    { date: '2023-10-21', steps: 1500, elev: '250m', time: '28:00', cal: 400, rec: '⭐' },
+    { date: '2023-10-20', steps: 1000, elev: '160m', time: '18:45', cal: 250, rec: '' },
+    { date: '2023-10-18', steps: 1200, elev: '190m', time: '21:00', cal: 300, rec: '' }
+  ];
 
-    function filterData(period, btn) {
-        var btns = document.querySelectorAll(".filter-buttons button");
-        btns.forEach(function(b) { b.classList.remove("active"); });
-        btn.classList.add("active");
+  const weeklyData = [
+    { day: 'Mon', val: 800 },
+    { day: 'Tue', val: 1250 },
+    { day: 'Wed', val: 0 },
+    { day: 'Thu', val: 1000 },
+    { day: 'Fri', val: 1500 },
+    { day: 'Sat', val: 0 },
+    { day: 'Sun', val: 0 }
+  ];
 
-        var filtered = data;
-        var today = new Date("2026/06/15");
-        
-        if (period === "week") {
-            filtered = data.filter(function(d) {
-                var dd = new Date(d.date);
-                return (today - dd) / (1000 * 60 * 60 * 24) <= 7;
-            });
-        } else if (period === "month") {
-            filtered = data.filter(function(d) {
-                return d.date.indexOf("2026/06") === 0;
-            });
-        }
-        
-        render(filtered);
-    }
+  function renderLogs() {
+    const tbody = document.getElementById('log-body');
+    tbody.innerHTML = logs.map(l => `
+      <tr>
+        <td>${l.date}</td>
+        <td>${l.steps}</td>
+        <td>${l.elev}</td>
+        <td>${l.time}</td>
+        <td>${l.cal} kcal</td>
+        <td>${l.rec}</td>
+      </tr>
+    `).join('');
+  }
 
-    function render(items) {
-        var body = document.getElementById("logBody");
-        body.innerHTML = "";
-        items.forEach(function(d) {
-            var row = document.createElement("tr");
-            row.innerHTML = "<td>" + d.date + "</td><td>" + d.shrine + "</td><td>" + d.steps + "段</td><td>" + d.time + "</td><td>" + d.cal + "kcal</td><td>" + d.weather + "</td>";
-            body.appendChild(row);
-        });
-    }
+  function renderChart() {
+    const chart = document.getElementById('weekly-chart');
+    const max = Math.max(...weeklyData.map(d => d.val), 1500);
+    chart.innerHTML = weeklyData.map(d => `
+      <div class="bar-row">
+        <div class="day-label">${d.day}</div>
+        <div class="bar-wrap">
+          <div class="bar-fill" style="width: ${(d.val/max)*100}%"></div>
+        </div>
+        <div class="bar-val">${d.val}</div>
+      </div>
+    `).join('');
+  }
 
-    render(data);
+  function filter(type) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderLogs();
+  }
+
+  window.onload = () => {
+    renderLogs();
+    setTimeout(renderChart, 100);
+  };
 </script>
-
 </body>
 </html>
