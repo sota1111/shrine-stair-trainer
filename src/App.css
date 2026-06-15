@@ -79,6 +79,16 @@ body {
   color: #922b21;
 }
 
+.validation-error {
+  background: #fadbd8;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  color: #922b21;
+  font-size: 0.9rem;
+}
+
 .form-group { margin-bottom: 14px; }
 .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.9rem; }
 .form-group input, .form-group select, .form-group textarea {
@@ -202,6 +212,24 @@ body {
   color: var(--color-primary);
   padding: 24px 0;
   letter-spacing: 2px;
+}
+
+.timer-set-indicator {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 8px 0;
+}
+
+.timer-best-time {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  margin-bottom: 12px;
+  padding: 8px;
+  background: var(--color-bg);
+  border-radius: var(--radius);
 }
 
 .timer-controls {

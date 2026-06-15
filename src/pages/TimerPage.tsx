@@ -178,6 +178,13 @@ const TimerPage: React.FC = () => {
         </div>
       )}
 
+      {isRunning && (
+        <p className="timer-set-indicator">第 {recordedSets.length + 1} セット 計測中</p>
+      )}
+      {!isRunning && elapsedMs === 0 && recordedSets.length > 0 && (
+        <p className="timer-set-indicator">第 {recordedSets.length} セット 完了</p>
+      )}
+
       <div className="timer-display">
         {formatTime(elapsedMs)}
       </div>
@@ -211,6 +218,13 @@ const TimerPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {recordedSets.length > 0 && (
+        <div className="timer-best-time">
+          ベスト: {Math.min(...recordedSets.map(s => s.timeSeconds)).toFixed(1)}s
+          （{recordedSets.length}セット完了）
+        </div>
+      )}
 
       {recordedSets.length > 0 && !isRunning && !showSaveForm && (
         <button 

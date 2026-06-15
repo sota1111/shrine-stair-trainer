@@ -28,10 +28,17 @@ const RecordPage: React.FC = () => {
   const [fatigue, setFatigue] = useState(5);
   const [hasPain, setHasPain] = useState(false);
   const [memo, setMemo] = useState('');
+  const [showValidation, setShowValidation] = useState(false);
 
   const calculateDayOfWeek = (dateStr: string) => {
     const days = ['日', '月', '火', '水', '木', '金', '土'];
     return days[new Date(dateStr).getDay()];
+  };
+
+  const isValid = (): boolean => {
+    if (!date) return false;
+    if (exercises.length === 0) return false;
+    return true;
   };
 
   const handleAddExercise = () => {
@@ -71,6 +78,9 @@ const RecordPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowValidation(true);
+    if (!isValid()) return;
+    
     const newRecord: TrainingRecord = {
       id: Date.now().toString(),
       date,
@@ -97,7 +107,7 @@ const RecordPage: React.FC = () => {
       </div>
 
       <div style={{ marginBottom: '16px' }}>
-        <button type="button" className="btn btn-secondary" style={{ width: '100%', minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => navigate('/timer')}>
+        <button type="button" className="btn btn-secondary btn-lg" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => navigate('/timer')}>
           ⏱️ タイム計測して記録する
         </button>
       </div>
@@ -111,6 +121,7 @@ const RecordPage: React.FC = () => {
 
       <form onSubmit={handleSubmit}>
         <section className="card">
+          <h3>📅 基本情報</h3>
           <div className="form-group">
             <label>実施日</label>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
@@ -216,6 +227,7 @@ const RecordPage: React.FC = () => {
         </div>
 
         <section className="card" style={{ marginTop: '20px' }}>
+          <h3>💪 体感・メモ</h3>
           <div className="form-group">
             <label>主観的強度 (1-10)</label>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{perceivedExertion}</div>
@@ -260,6 +272,12 @@ const RecordPage: React.FC = () => {
               style={{ padding: '12px', fontSize: '1rem' }}
             />
           </div>
+
+          {showValidation && !isValid() && (
+            <div className="validation-error">
+              ⚠️ 入力内容を確認してください: {!date ? '日付が未入力' : exercises.length === 0 ? '種目が必要です' : ''}
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.2rem', minHeight: '64px' }}>
             記録を保存する
