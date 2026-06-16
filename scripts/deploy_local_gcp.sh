@@ -5,8 +5,8 @@ set -euo pipefail
 # (shrine-stair-trainer)
 #
 # 使い方:
-#   cp .env.example .env && vi .env
-#   source .env && bash scripts/deploy_local_gcp.sh
+#   # 環境変数をロードした状態で実行
+#   bash scripts/deploy_local_gcp.sh
 
 if [ -f .env ]; then set -a; source .env; set +a; fi
 
@@ -17,7 +17,13 @@ ARTIFACT_REPO="${ARTIFACT_REGISTRY_REPOSITORY:-shrine-stair-registry}"
 IMAGE_VAR="${IMAGE_NAME:-shrine-stair-trainer}"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/${IMAGE_VAR}"
 
-VITE_AUTH_PASSWORD="${VITE_AUTH_PASSWORD:?VITE_AUTH_PASSWORD is required}"
+ALLOWED_USER_EMAILS="${ALLOWED_USER_EMAILS:?ALLOWED_USER_EMAILS is required}"
+
+# Firebase config is needed at build time for the Vite SPA.
+VITE_FIREBASE_API_KEY="${VITE_FIREBASE_API_KEY:?VITE_FIREBASE_API_KEY is required}"
+VITE_FIREBASE_AUTH_DOMAIN="${VITE_FIREBASE_AUTH_DOMAIN:?VITE_FIREBASE_AUTH_DOMAIN is required}"
+VITE_FIREBASE_PROJECT_ID="${VITE_FIREBASE_PROJECT_ID:?VITE_FIREBASE_PROJECT_ID is required}"
+VITE_FIREBASE_APP_ID="${VITE_FIREBASE_APP_ID:?VITE_FIREBASE_APP_ID is required}"
 
 echo "== Cloud Run デプロイ: ${SERVICE_NAME} =="
 echo "Project: ${PROJECT_ID} | Region: ${REGION}"
@@ -34,18 +40,11 @@ gcloud artifacts repositories create "${ARTIFACT_REPO}" \
 gcloud builds submit . \
   --project="${PROJECT_ID}" \
   --tag="${IMAGE}:latest" \
-  --substitutions="_VITE_AUTH_PASSWORD=${VITE_AUTH_PASSWORD}" \
+  --substitutions="_VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY},_VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN},_VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID},_VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}" \
   --timeout=600s
 
-
-# Secret Manager: 初回デプロイ前に以下を実行してください
-# echo -n "value" | gcloud secrets create shrine-trainer-auth-password --data-file=- --project=$PROJECT_ID
-# gcloud projects add-iam-policy-binding $PROJECT_ID \
-#   --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-#   --role="roles/secretmanager.secretAccessor"
-
 gcloud run deploy "${SERVICE_NAME}" \
-  --set-secrets="VITE_AUTH_PASSWORD=shrine-trainer-auth-password:latest" \
+  --set-env-vars "ALLOWED_USER_EMAILS=${ALLOWED_USER_EMAILS}" \
   --image="${IMAGE}:latest" \
   --project="${PROJECT_ID}" \
   --region="${REGION}" \

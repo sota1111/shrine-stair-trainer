@@ -3,7 +3,13 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'VITE_AUTH_PASSWORD=${_VITE_AUTH_PASSWORD}'
+      - 'VITE_FIREBASE_API_KEY=${_VITE_FIREBASE_API_KEY}'
+      - '--build-arg'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=${_VITE_FIREBASE_AUTH_DOMAIN}'
+      - '--build-arg'
+      - 'VITE_FIREBASE_PROJECT_ID=${_VITE_FIREBASE_PROJECT_ID}'
+      - '--build-arg'
+      - 'VITE_FIREBASE_APP_ID=${_VITE_FIREBASE_APP_ID}'
       - '-t'
       - '${_IMAGE}'
       - '.'
@@ -11,6 +17,9 @@ images:
   - '${_IMAGE}'
 substitutions:
   _IMAGE: 'gcr.io/${PROJECT_ID}/shrine-stair-trainer'
-  _VITE_AUTH_PASSWORD: ''
+  _VITE_FIREBASE_API_KEY: ''
+  _VITE_FIREBASE_AUTH_DOMAIN: ''
+  _VITE_FIREBASE_PROJECT_ID: ''
+  _VITE_FIREBASE_APP_ID: ''
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -22,29 +22,60 @@ npm run dev
 
 ブラウザで http://localhost:5173 にアクセス。
 
-## 認証について
+## 構成とセキュリティ (Updated SOT-669)
 
-Firebase Authentication (Email/Password) を使用しています。
+以前の構成（nginx + client-only auth）から、セキュリティ強化のため以下の構成に変更されました：
 
-- Firebase Console に登録されたユーザーのみログイン可能です
-- 認証状態は Firebase SDK によって管理されます
-- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。
-  - サーバー側での Firebase ID token 検証は対象外です。
-  - Firebase Console でユーザーを手動作成することで利用者を制限します。
-  - `AUTH_SECRET` は不要です（サーバーがないため）。
+1. **ID Token 検証**: フロントエンドは Firebase SDK で取得した ID Token を `Authorization: Bearer` ヘッダーに乗せて API を呼び出します。
+2. **サーバー側認可**: Node サーバー側で `firebase-admin` を使用してトークンを検証し、`ALLOWED_USER_EMAILS` 環境変数に含まれるメールアドレスのみアクセスを許可します。
+3. **API 経由のデータアクセス**: ブラウザから Firestore への直接アクセスを廃止し、すべてのデータ操作（記録の保存・取得・削除）はサーバー API を経由します。
+4. **統合配信**: 単一の Node サーバーが静的 SPA (`dist/`) の配信と API エンドポイントの提供を同居して行います。
 
-### Firebase 設定
+## 環境構築
 
-`.env` ファイルに以下の設定が必要です（`.env.example` 参照）:
+### 必要な環境変数 (.env)
 
-```
+`.env.example` を参考に `.env` を作成し、以下の値を設定してください。
+
+```env
+# Firebase Client SDK 用 (Vite ビルド時に使用)
 VITE_FIREBASE_API_KEY=...
 VITE_FIREBASE_AUTH_DOMAIN=...
 VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_APP_ID=...
+
+# Backend Server 用 (実行時に使用)
+ALLOWED_USER_EMAILS=user@example.com,another@example.com
+PORT=8080
 ```
 
-これらの値は Firebase Console > プロジェクト設定 > 全般 > マイアプリ から取得できます。
+### ローカル実行
+
+1. 依存関係のインストール:
+   ```bash
+   npm install
+   ```
+2. フロントエンドのビルド:
+   ```bash
+   npm run build
+   ```
+3. サーバーの起動:
+   ```bash
+   # Google Cloud の Application Default Credentials (ADC) が必要です
+   npm start
+   ```
+
+## デプロイ
+
+Cloud Run へのデプロイには、以下のスクリプトを使用します。
+
+```bash
+# 事前に必要な環境変数をロードした状態で実行してください
+bash scripts/deploy-cloudrun.sh
+```
+
+デプロイ時には `ALLOWED_USER_EMAILS` が Cloud Run のランタイム環境変数として設定されます。
+以前使用していた `VITE_AUTH_PASSWORD` は廃止されました。
 
 
 ## 画面構成
@@ -156,81 +187,14 @@ VITE_FIREBASE_APP_ID=...
 - 複数デバイス間でのデータ同期に対応
 - 初回ログイン時、既存の `localStorage` データ（非サンプルデータ）は Firestore へ自動移行されます
 
-### Firestore セキュリティルール (推奨)
-
-Firestore を利用する際は、以下のセキュリティルールを設定してください。
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/records/{recordId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
 ## 今後追加したい機能
 
 - 天気API連携（現在地の天気を自動取得）
 - Google Fit / Apple Health 連携
 - 月次レポート生成
 
-## GCP デプロイ準備
-
-### 概要
-
-このアプリは React (Vite) のみで構成されており、静的サイトとして GCP にホストできます。
-
-### コンテナ化
-
-Docker を使ってビルド・実行できます:
-
-```bash
-docker build -t shrine-stair-trainer .
-docker run -p 8080:8080 --env-file .env shrine-stair-trainer
-```
-
-### GCP 実行環境
-
-- **推奨**: Cloud Run (コンテナとしてデプロイ)
-- ポート: `8080` (Cloud Run のデフォルト)
-- 環境変数: `.env.example` を参照し、Cloud Run の環境変数設定または Secret Manager で管理
-
-### 環境変数
-
-| 変数名 | 説明 |
-|--------|------|
-| VITE_FIREBASE_API_KEY | Firebase API キー |
-| VITE_FIREBASE_AUTH_DOMAIN | Firebase Auth ドメイン |
-| VITE_FIREBASE_PROJECT_ID | Firebase プロジェクト ID |
-| VITE_FIREBASE_APP_ID | Firebase アプリ ID |
-
 ### 注意事項
 
 - 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
 - 認証情報は Firebase Authentication で管理されます
 - データは Firestore に保存されます
-
-## Cloud Run へのデプロイ
-
-### 前提条件
-
-- `gcloud auth login` 済み
-- GCP プロジェクトで Cloud Build API と Cloud Run API が有効になっていること
-  ```bash
-  gcloud services enable run.googleapis.com cloudbuild.googleapis.com --project=YOUR_PROJECT_ID
-  ```
-
-### デプロイ手順
-
-```bash
-GCP_PROJECT_ID=your-project-id \
-bash scripts/deploy-cloudrun.sh
-```
-
-### 注意事項
-
-- Firebase の設定値はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
-- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）でデプロイしますが、アプリ内の Firebase Auth によって画面が保護されます。
