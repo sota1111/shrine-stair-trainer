@@ -1,18 +1,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  writeBatch,
-  limit
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { useAuth } from './useAuth';
 import { TrainingRecordsContext } from './trainingRecordsContextValue';
+import { apiClient } from '../lib/apiClient';
 import type { TrainingRecord } from '../types';
 
 const STORAGE_KEY = 'shrine-stair-trainer-records';
@@ -33,7 +22,7 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     setError(null);
   }
 
-  const migrateLocalStorage = useCallback(async (userUid: string) => {
+  const migrateLocalStorage = useCallback(async () => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
       localStorage.setItem(MIGRATION_KEY, 'true');
@@ -45,19 +34,10 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
       const toMigrate = localRecords.filter(r => !r.id.startsWith('sample-'));
 
       if (toMigrate.length > 0) {
-        // Double check Firestore is still empty before migrating
-        const recordsRef = collection(db, 'users', userUid, 'records');
-        const q = query(recordsRef, limit(1));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          const batch = writeBatch(db);
-          toMigrate.forEach(record => {
-            const docRef = doc(db, 'users', userUid, 'records', record.id);
-            batch.set(docRef, record);
-          });
-          await batch.commit();
-        }
+        await apiClient.batchPutRecords(toMigrate);
+        // Refresh records after migration
+        const fetchedRecords = await apiClient.getRecords();
+        setRecords(fetchedRecords);
       }
       
       localStorage.setItem(MIGRATION_KEY, 'true');
@@ -67,38 +47,39 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
+  const fetchRecords = useCallback(async () => {
     if (!uid) return;
+    try {
+      const fetchedRecords = await apiClient.getRecords();
+      setRecords(fetchedRecords);
+      setError(null);
 
-    const recordsRef = collection(db, 'users', uid, 'records');
-    const q = query(recordsRef, orderBy('createdAt', 'desc'));
-
-    const unsubscribe = onSnapshot(q, 
-      (snapshot) => {
-        const fetchedRecords = snapshot.docs.map(doc => doc.data() as TrainingRecord);
-        setRecords(fetchedRecords);
-        setLoading(false);
-
-        // Check for migration if this is the first load and Firestore is empty
-        if (fetchedRecords.length === 0 && !localStorage.getItem(MIGRATION_KEY)) {
-          migrateLocalStorage(uid);
-        }
-      },
-      (err) => {
-        console.error('Error fetching training records:', err);
-        setError('記録の読み込みに失敗しました');
-        setLoading(false);
+      // Check for migration if Firestore is empty and not already migrated
+      if (fetchedRecords.length === 0 && !localStorage.getItem(MIGRATION_KEY)) {
+        await migrateLocalStorage();
       }
-    );
-
-    return () => unsubscribe();
+    } catch (err) {
+      console.error('Error fetching training records:', err);
+      setError('記録の読み込みに失敗しました');
+    } finally {
+      setLoading(false);
+    }
   }, [uid, migrateLocalStorage]);
+
+  useEffect(() => {
+    if (uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchRecords();
+    }
+  }, [uid, fetchRecords]);
 
   const addRecord = async (record: TrainingRecord) => {
     if (!uid) return;
 
     try {
-      await setDoc(doc(db, 'users', uid, 'records', record.id), record);
+      await apiClient.putRecord(record);
+      // Optimistic update or refetch
+      setRecords(prev => [record, ...prev].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
     } catch (err) {
       console.error('Error adding record:', err);
       setError('記録の保存に失敗しました');
