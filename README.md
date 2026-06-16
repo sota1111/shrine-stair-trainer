@@ -15,7 +15,7 @@
 
 ```bash
 cp .env.example .env
-# .env を開き VITE_AUTH_PASSWORD に任意のパスワードを設定
+# .env に Firebase の設定値を記述
 npm install
 npm run dev
 ```
@@ -28,8 +28,10 @@ Firebase Authentication (Email/Password) を使用しています。
 
 - Firebase Console に登録されたユーザーのみログイン可能です
 - 認証状態は Firebase SDK によって管理されます
-- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。そのため、`ALLOWED_USER_EMAILS` 等によるサーバー側でのメールアドレス制限は実装されていません。認証の制限は Firebase 側の設定（ユーザー登録の有無）に依存します。
-- 旧パスワード認証（`VITE_AUTH_PASSWORD`）は廃止されました
+- **重要**: 本アプリは静的フロントエンドのみで構成されており、バックエンド（APIサーバー）が存在しません。
+  - サーバー側での Firebase ID token 検証は対象外です。
+  - Firebase Console でユーザーを手動作成することで利用者を制限します。
+  - `AUTH_SECRET` は不要です（サーバーがないため）。
 
 ### Firebase 設定
 
@@ -149,14 +151,30 @@ VITE_FIREBASE_APP_ID=...
 
 ## データ保存
 
-- ブラウザの localStorage に保存
-- 初回起動時はサンプルデータを自動読み込み
+- Firebase Firestore に保存・同期
+- ログイン中のユーザーごとに `users/{uid}/records/{recordId}` 構造で保存されます
+- 複数デバイス間でのデータ同期に対応
+- 初回ログイン時、既存の `localStorage` データ（非サンプルデータ）は Firestore へ自動移行されます
+
+### Firestore セキュリティルール (推奨)
+
+Firestore を利用する際は、以下のセキュリティルールを設定してください。
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/records/{recordId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
 
 ## 今後追加したい機能
 
 - 天気API連携（現在地の天気を自動取得）
 - Google Fit / Apple Health 連携
-- Firestore への記録同期（複数デバイス対応）
 - 月次レポート生成
 
 ## GCP デプロイ準備
@@ -193,7 +211,7 @@ docker run -p 8080:8080 --env-file .env shrine-stair-trainer
 
 - 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
 - 認証情報は Firebase Authentication で管理されます
-- データは localStorage に保存されており、GCP 側のデータ永続化は不要
+- データは Firestore に保存されます
 
 ## Cloud Run へのデプロイ
 
@@ -215,4 +233,4 @@ bash scripts/deploy-cloudrun.sh
 ### 注意事項
 
 - Firebase の設定値はビルド時に静的バンドルへ埋め込まれます（ランタイム環境変数ではありません）
-- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）で作成されます
+- Cloud Run サービスは `--allow-unauthenticated`（公開アクセス可）でデプロイしますが、アプリ内の Firebase Auth によって画面が保護されます。

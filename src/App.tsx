@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { TrainingRecordsProvider } from './context/TrainingRecordsContext';
 import { useAuth } from './context/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
@@ -56,7 +57,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppLayout />
+        <TrainingRecordsProvider>
+          <AppLayout />
+        </TrainingRecordsProvider>
       </AuthProvider>
     </BrowserRouter>
   );
