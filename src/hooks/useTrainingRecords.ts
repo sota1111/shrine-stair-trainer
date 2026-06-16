@@ -1,29 +1,12 @@
-import { useState } from 'react';
-import type { TrainingRecord } from '../types';
-import { sampleData } from '../data/sampleData';
-
-const STORAGE_KEY = 'shrine-stair-trainer-records';
+import { useContext } from 'react';
+import { TrainingRecordsContext } from '../context/trainingRecordsContextValue';
 
 export function useTrainingRecords() {
-  const [records, setRecords] = useState<TrainingRecord[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return sampleData;
-      }
-    }
-    // If no data, initialize with sample data
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleData));
-    return sampleData;
-  });
+  const context = useContext(TrainingRecordsContext);
+  
+  if (!context) {
+    throw new Error('useTrainingRecords must be used within TrainingRecordsProvider');
+  }
 
-  const addRecord = (record: TrainingRecord) => {
-    const updated = [record, ...records];
-    setRecords(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  };
-
-  return { records, addRecord };
+  return context;
 }

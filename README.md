@@ -151,14 +151,30 @@ VITE_FIREBASE_APP_ID=...
 
 ## データ保存
 
-- ブラウザの localStorage に保存
-- 初回起動時はサンプルデータを自動読み込み
+- Firebase Firestore に保存・同期
+- ログイン中のユーザーごとに `users/{uid}/records/{recordId}` 構造で保存されます
+- 複数デバイス間でのデータ同期に対応
+- 初回ログイン時、既存の `localStorage` データ（非サンプルデータ）は Firestore へ自動移行されます
+
+### Firestore セキュリティルール (推奨)
+
+Firestore を利用する際は、以下のセキュリティルールを設定してください。
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/records/{recordId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
 
 ## 今後追加したい機能
 
 - 天気API連携（現在地の天気を自動取得）
 - Google Fit / Apple Health 連携
-- Firestore への記録同期（複数デバイス対応）
 - 月次レポート生成
 
 ## GCP デプロイ準備
@@ -195,7 +211,7 @@ docker run -p 8080:8080 --env-file .env shrine-stair-trainer
 
 - 実際の `.env` ファイルは Git 管理対象外 (`.gitignore` 設定済み)
 - 認証情報は Firebase Authentication で管理されます
-- データは localStorage に保存されており、GCP 側のデータ永続化は不要
+- データは Firestore に保存されます
 
 ## Cloud Run へのデプロイ
 
