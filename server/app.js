@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import recordsRouter from './routes/records.js';
+import authRouter from './routes/auth.js';
+import { csrfProtection } from './middleware/csrf.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,7 +12,13 @@ const distPath = path.join(__dirname, '../dist');
 
 const app = express();
 
+// Behind Cloud Run's proxy: trust x-forwarded-* so req.protocol / origin are correct.
+app.set('trust proxy', true);
+
 app.use(express.json());
+
+// CSRF protection for state-changing API requests (same-origin check).
+app.use(csrfProtection);
 
 // Health check
 app.get('/healthz', (req, res) => {
@@ -18,6 +26,7 @@ app.get('/healthz', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRouter);
 app.use('/api/records', recordsRouter);
 
 // Not Found handler for API and healthz

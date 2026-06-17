@@ -22,14 +22,15 @@ npm run dev
 
 ブラウザで http://localhost:5173 にアクセス。
 
-## 構成とセキュリティ (Updated SOT-669)
+## 構成とセキュリティ (Updated SOT-743)
 
-以前の構成（nginx + client-only auth）から、セキュリティ強化のため以下の構成に変更されました：
+案1（サーバサイド Firebase REST 認証 + 自前サーバセッション）へ移行しました。ブラウザは Firebase と直接通信しません。
 
-1. **ID Token 検証**: フロントエンドは Firebase SDK で取得した ID Token を `Authorization: Bearer` ヘッダーに乗せて API を呼び出します。
-2. **サーバー側認可**: Node サーバー側で `firebase-admin` を使用してトークンを検証し、`ALLOWED_USER_EMAILS` 環境変数に含まれるメールアドレスのみアクセスを許可します。
-3. **API 経由のデータアクセス**: ブラウザから Firestore への直接アクセスを廃止し、すべてのデータ操作（記録の保存・取得・削除）はサーバー API を経由します。
-4. **統合配信**: 単一の Node サーバーが静的 SPA (`dist/`) の配信と API エンドポイントの提供を同居して行います。
+1. **サーバサイド認証**: ブラウザは自前のメール/パスワードフォームから資格情報をサーバ (`POST /api/auth/login`) に送信します。サーバが Firebase Identity Toolkit REST (`accounts:signInWithPassword`) を **サーバ側の `FIREBASE_API_KEY`** で呼び出して照合します。Firebase Client SDK ログイン（`signInWithEmailAndPassword`）と `Authorization: Bearer` 方式は撤去されました。
+2. **サーバセッション (署名Cookie)**: 認証成功時、`AUTH_SECRET` で HMAC 署名した HttpOnly Cookie（本番は Secure、SameSite=Lax）を発行します。Cookie には Firebase uid を埋め込み、各保護API/ページはこの Cookie を検証してアクセス制御します（`req.uid` をユーザ単位の Firestore スコープに使用）。`ALLOWED_USER_EMAILS` に含まれるメールアドレスのみ許可します。
+3. **CSRF / パスワード保護**: 状態変更API（POST/PUT/PATCH/DELETE）に同一オリジン (Origin/Referer) チェックを適用。パスワードや Identity Toolkit の生レスポンスはログ出力しません。
+4. **API 経由のデータアクセス**: ブラウザから Firestore への直接アクセスは廃止し、すべてのデータ操作はサーバー API を経由します。
+5. **統合配信**: 単一の Node サーバーが静的 SPA (`dist/`) の配信と API エンドポイントの提供を同居して行います。
 
 ## 環境構築
 
@@ -47,6 +48,10 @@ VITE_FIREBASE_APP_ID=...
 # Backend Server 用 (実行時に使用)
 ALLOWED_USER_EMAILS=user@example.com,another@example.com
 PORT=8080
+# サーバ側でメール/パスワード照合に使う Firebase Web API key（ブラウザには渡さない）
+FIREBASE_API_KEY=...
+# サーバセッションCookieの署名に使うランダムなシークレット
+AUTH_SECRET=...
 ```
 
 ### ローカル実行
