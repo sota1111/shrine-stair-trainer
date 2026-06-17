@@ -610,3 +610,20 @@ body {
     min-height: 180px;
   }
 }
+
+.sync-banner {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.sync-banner--offline {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.sync-banner--syncing {
+  background: #e8f4fd;
+  color: #1565c0;
+}

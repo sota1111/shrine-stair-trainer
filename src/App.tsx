@@ -11,6 +11,7 @@ import ChartsPage from './pages/ChartsPage';
 import WeeklyMenuPage from './pages/WeeklyMenuPage';
 import LoginPage from './pages/LoginPage';
 import BottomNav from './components/BottomNav';
+import SyncStatusBanner from './components/SyncStatusBanner';
 import './App.css';
 
 function AppLayout() {
@@ -36,6 +37,7 @@ function AppLayout() {
           )}
         </div>
       </header>
+      <SyncStatusBanner />
       <main className="app-main">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
