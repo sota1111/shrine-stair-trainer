@@ -2,10 +2,21 @@ import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useAuth } from './useAuth';
 import { TrainingRecordsContext } from './trainingRecordsContextValue';
 import { apiClient } from '../lib/apiClient';
+import * as offlineQueue from '../lib/offlineQueue';
 import type { TrainingRecord } from '../types';
 
 const STORAGE_KEY = 'shrine-stair-trainer-records';
 const MIGRATION_KEY = 'shrine-stair-trainer-migrated';
+
+/**
+ * Heuristic: a write failed because of connectivity (so it should be queued for
+ * later sync) rather than a genuine server rejection. `fetch` rejects with a
+ * TypeError when the network is unreachable; `navigator.onLine` being false is
+ * the explicit offline signal.
+ */
+function isConnectivityError(err: unknown): boolean {
+  return !navigator.onLine || err instanceof TypeError;
+}
 
 export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   const { uid } = useAuth();
@@ -13,6 +24,10 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   const [records, setRecords] = useState<TrainingRecord[]>([]);
   const [loading, setLoading] = useState(!!uid);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   // Sync state if uid changes (e.g. login/logout)
   if (uid !== prevUid) {
@@ -21,6 +36,11 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     setLoading(!!uid);
     setError(null);
   }
+
+  const refreshPendingCount = useCallback(async () => {
+    const n = await offlineQueue.count();
+    setPendingSyncCount(n);
+  }, []);
 
   const migrateLocalStorage = useCallback(async () => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -39,13 +59,56 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
         const fetchedRecords = await apiClient.getRecords();
         setRecords(fetchedRecords);
       }
-      
+
       localStorage.setItem(MIGRATION_KEY, 'true');
       localStorage.removeItem(STORAGE_KEY);
     } catch (err) {
       console.error('Migration error:', err);
     }
   }, []);
+
+  /**
+   * Replay queued offline writes to the server. Idempotent: each record is
+   * PUT by its id and removed from the queue only on success. Stops on the
+   * first connectivity error so the remaining records stay queued for a later
+   * retry.
+   */
+  const flushQueue = useCallback(async () => {
+    if (!navigator.onLine || !uid) return;
+    let pending: TrainingRecord[];
+    try {
+      pending = await offlineQueue.getAll();
+    } catch {
+      return;
+    }
+    if (pending.length === 0) return;
+
+    let synced = false;
+    for (const record of pending) {
+      try {
+        await apiClient.putRecord(record);
+        await offlineQueue.remove(record.id);
+        synced = true;
+      } catch (err) {
+        if (isConnectivityError(err)) break; // still offline — retry later
+        // Genuine server rejection: drop it from the queue so it does not
+        // block the rest, but surface the problem.
+        console.error('Failed to sync queued record:', err);
+        await offlineQueue.remove(record.id);
+      }
+    }
+
+    await refreshPendingCount();
+    if (synced) {
+      // Reconcile local state with the server after a successful sync.
+      try {
+        setRecords(await apiClient.getRecords());
+        setError(null);
+      } catch {
+        // Ignore — local optimistic state already reflects the records.
+      }
+    }
+  }, [uid, refreshPendingCount]);
 
   const fetchRecords = useCallback(async () => {
     if (!uid) return;
@@ -60,7 +123,12 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Error fetching training records:', err);
-      setError('記録の読み込みに失敗しました');
+      if (!navigator.onLine) {
+        // Offline: keep whatever we already have; not a hard error.
+        setError(null);
+      } else {
+        setError('記録の読み込みに失敗しました');
+      }
     } finally {
       setLoading(false);
     }
@@ -70,17 +138,41 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     if (uid) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchRecords();
+      refreshPendingCount();
+      flushQueue();
     }
-  }, [uid, fetchRecords]);
+  }, [uid, fetchRecords, refreshPendingCount, flushQueue]);
+
+  // Track connectivity and flush the offline queue when coming back online.
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      flushQueue();
+    };
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [flushQueue]);
 
   const addRecord = async (record: TrainingRecord) => {
     if (!uid) return;
 
+    // Optimistic update so the record shows immediately, online or offline.
+    setRecords(prev => [record, ...prev].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+
     try {
       await apiClient.putRecord(record);
-      // Optimistic update or refetch
-      setRecords(prev => [record, ...prev].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
     } catch (err) {
+      if (isConnectivityError(err)) {
+        // Offline: persist to the queue and sync on reconnect.
+        await offlineQueue.enqueue(record);
+        await refreshPendingCount();
+        return;
+      }
       console.error('Error adding record:', err);
       setError('記録の保存に失敗しました');
       throw err;
@@ -88,7 +180,9 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <TrainingRecordsContext.Provider value={{ records, loading, error, addRecord }}>
+    <TrainingRecordsContext.Provider
+      value={{ records, loading, error, addRecord, isOnline, pendingSyncCount }}
+    >
       {children}
     </TrainingRecordsContext.Provider>
   );
