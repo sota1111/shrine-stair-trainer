@@ -72,7 +72,34 @@ AUTH_SECRET=...
 
 ## デプロイ
 
-Cloud Run へのデプロイには、以下のスクリプトを使用します。
+### GitHub Actions による自動デプロイ (Cloud Run)
+
+`main` への push（および `workflow_dispatch` による手動実行）で、
+`.github/workflows/deploy-cloudrun.yml` が GCP Cloud Run へ自動デプロイします。
+
+- 認証は Workload Identity Federation を使用します（JSONキーは不使用）。
+- フロー: Docker build → Artifact Registry push → `gcloud run deploy`。
+- Vite ビルド時に Firebase 設定が必要なため、build 時に `VITE_FIREBASE_*` を `--build-arg` で渡します。
+
+#### 必要な GitHub Secrets
+
+| Secret | 説明 |
+|--------|------|
+| `GCP_PROJECT_ID` | GCP プロジェクト ID |
+| `GCP_PROJECT_NUMBER` | GCP プロジェクト番号 |
+| `GCP_REGION` | デプロイ先リージョン（例: `asia-northeast1`） |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload Identity Provider のリソース名 |
+| `GCP_SERVICE_ACCOUNT` | デプロイに使用するサービスアカウント |
+| `ARTIFACT_REGISTRY_REPOSITORY` | Artifact Registry のリポジトリ名 |
+| `CLOUD_RUN_SERVICE` | Cloud Run サービス名（= `shrine-stair-trainer`） |
+| `VITE_FIREBASE_API_KEY` | Firebase Client SDK API Key（ビルド時） |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth Domain（ビルド時） |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID（ビルド時） |
+| `VITE_FIREBASE_APP_ID` | Firebase App ID（ビルド時） |
+
+### 手動デプロイ
+
+ローカルから手動でデプロイする場合は、以下のスクリプトを使用します。
 
 ```bash
 # 事前に必要な環境変数をロードした状態で実行してください
