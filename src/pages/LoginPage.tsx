@@ -18,14 +18,9 @@ export default function LoginPage() {
       await login(email, password)
       navigate('/record')
     } catch (err: unknown) {
+      // The server returns a localized error message; surface it directly.
       const msg = err instanceof Error ? err.message : ''
-      if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
-        setError('メールアドレスまたはパスワードが正しくありません')
-      } else if (msg.includes('auth/too-many-requests')) {
-        setError('ログイン試行が多すぎます。しばらく待ってから再試行してください')
-      } else {
-        setError('ログインに失敗しました')
-      }
+      setError(msg || 'ログインに失敗しました')
     } finally {
       setLoading(false)
     }
