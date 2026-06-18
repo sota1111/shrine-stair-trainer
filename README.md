@@ -49,6 +49,8 @@ VITE_FIREBASE_APP_ID=...
 ALLOWED_USER_EMAILS=user@example.com,another@example.com
 PORT=8080
 # サーバ側でメール/パスワード照合に使う Firebase Web API key（ブラウザには渡さない）
+# FIREBASE_WEB_API_KEY を優先し、未設定時は FIREBASE_API_KEY にフォールバックする
+FIREBASE_WEB_API_KEY=...
 FIREBASE_API_KEY=...
 # サーバセッションCookieの署名に使うランダムなシークレット
 AUTH_SECRET=...
@@ -86,7 +88,6 @@ AUTH_SECRET=...
 | Secret | 説明 |
 |--------|------|
 | `GCP_PROJECT_ID` | GCP プロジェクト ID |
-| `GCP_PROJECT_NUMBER` | GCP プロジェクト番号 |
 | `GCP_REGION` | デプロイ先リージョン（例: `asia-northeast1`） |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload Identity Provider のリソース名 |
 | `GCP_SERVICE_ACCOUNT` | デプロイに使用するサービスアカウント |
