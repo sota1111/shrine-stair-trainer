@@ -20,7 +20,7 @@ export const login = async (req, res) => {
   }
 
   if (!FIREBASE_API_KEY) {
-    console.error('FIREBASE_API_KEY is not configured.');
+    console.error('FIREBASE_WEB_API_KEY / FIREBASE_API_KEY is not configured.');
     return res.status(500).json({ error: '認証に失敗しました' });
   }
 
