@@ -109,6 +109,11 @@ bash scripts/deploy-cloudrun.sh
 デプロイ時には `ALLOWED_USER_EMAILS` が Cloud Run のランタイム環境変数として設定されます。
 以前使用していた `VITE_AUTH_PASSWORD` は廃止されました。
 
+サーバ側のメール/パスワード照合に使う Firebase Web API key は、ランタイム環境変数
+`FIREBASE_WEB_API_KEY`（優先）または `FIREBASE_API_KEY`（フォールバック）で渡します。
+本番 Cloud Run では Secret Manager 管理の Secret を `--set-secrets` で注入してください
+（`AUTH_SECRET` / `ALLOWED_USER_EMAILS` も同様）。
+
 
 ## 画面構成
 
