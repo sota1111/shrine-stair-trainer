@@ -384,9 +384,19 @@ body {
     font-size: 0.85rem;
   }
 
-  .app-nav a {
-    padding: 6px 12px;
-    font-size: 0.8rem;
+  /* The BottomNav already provides navigation on mobile, so the redundant
+     top nav is hidden to reclaim vertical space and avoid scrolling. */
+  .app-nav {
+    display: none;
+  }
+
+  .app-header {
+    padding: 8px 16px;
+  }
+
+  .app-header h1 {
+    margin: 0;
+    font-size: 1.05rem;
   }
 }
 

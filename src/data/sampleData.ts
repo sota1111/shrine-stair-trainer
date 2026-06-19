@@ -2,7 +2,9 @@ import type { TrainingRecord, ExerciseType, WeatherCondition, RoadCondition, Exe
 
 const generateSampleData = (): TrainingRecord[] => {
   const records: TrainingRecord[] = [];
-  const today = new Date('2026-06-09');
+  // Anchored at the end of May 2026 so the generated 28 days fall within May 2026,
+  // giving reviewers placeholder data to evaluate the UI against.
+  const today = new Date('2026-05-31');
   const dayLabels = ['日', '月', '火', '水', '木', '金', '土'];
 
   for (let i = 28; i >= 1; i--) {

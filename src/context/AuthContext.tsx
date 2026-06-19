@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setIsAuthenticated(true)
     setEmail(data.email ?? emailAddr)
-    setUid(null)
+    setUid(data.uid ?? null)
   }
 
   const logout = async () => {
