@@ -46,6 +46,7 @@ const TimerPage: React.FC = () => {
   const [exerciseType, setExerciseType] = useState<ExerciseType>('70段ダッシュ');
   const [weather, setWeather] = useState<WeatherCondition>('sunny');
   const [roadCondition, setRoadCondition] = useState<RoadCondition>('dry');
+  const [confirmed, setConfirmed] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -88,6 +89,7 @@ const TimerPage: React.FC = () => {
       setStartTime(null);
       setRecordedSets([]);
       setShowSaveForm(false);
+      setConfirmed(false);
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
   };
@@ -136,18 +138,17 @@ const TimerPage: React.FC = () => {
   };
 
   const isConditionDangerous = isDangerousCondition(weather, roadCondition);
-  // Once a measurement session has begun (running or at least one set recorded),
-  // the weather / road / exercise are locked in. Collapse the selectors to a
-  // compact read-only summary so only the chosen values are shown (and the page
-  // needs less scrolling). They become editable again after a full discard.
-  const measurementStarted = isRunning || recordedSets.length > 0;
+  // The user first chooses weather / road / exercise, then presses 決定 (confirm).
+  // Once confirmed, the selectors collapse to a compact read-only summary so only
+  // the chosen values are shown and the timer is revealed. They become editable
+  // again after a full discard (全破棄).
 
   return (
     <div className="timer-page container">
       <h2>⏱️ タイム計測</h2>
 
       <section className="card" style={{ marginBottom: '16px' }}>
-        {measurementStarted ? (
+        {confirmed ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={conditionChipStyle}>{WEATHER_LABELS[weather]}</span>
             <span style={conditionChipStyle}>{ROAD_LABELS[roadCondition]}</span>
@@ -207,6 +208,14 @@ const TimerPage: React.FC = () => {
                 </p>
               )}
             </div>
+
+            <button
+              className="btn btn-primary"
+              style={{ width: '100%', minHeight: '56px', fontSize: '1.2rem', marginTop: '8px' }}
+              onClick={() => setConfirmed(true)}
+            >
+              決定
+            </button>
           </>
         )}
       </section>
@@ -218,130 +227,134 @@ const TimerPage: React.FC = () => {
         </div>
       )}
 
-      {isRunning && (
-        <p className="timer-set-indicator">第 {recordedSets.length + 1} セット 計測中</p>
-      )}
-      {!isRunning && elapsedMs === 0 && recordedSets.length > 0 && (
-        <p className="timer-set-indicator">第 {recordedSets.length} セット 完了</p>
-      )}
+      {confirmed && (
+        <>
+          {isRunning && (
+            <p className="timer-set-indicator">第 {recordedSets.length + 1} セット 計測中</p>
+          )}
+          {!isRunning && elapsedMs === 0 && recordedSets.length > 0 && (
+            <p className="timer-set-indicator">第 {recordedSets.length} セット 完了</p>
+          )}
 
-      <div className="timer-display">
-        {formatTime(elapsedMs)}
-      </div>
-
-      <div className="timer-controls">
-        {!isRunning ? (
-          <button className="timer-btn-start" onClick={handleStart}>
-            START
-          </button>
-        ) : (
-          <button className="timer-btn-stop" onClick={handleStop}>
-            STOP
-          </button>
-        )}
-
-        <div className="timer-secondary-row">
-          <button className="timer-btn-secondary" onClick={handleReset}>
-            リセット
-          </button>
-          <button className="timer-btn-secondary" onClick={handleDiscard}>
-            全破棄
-          </button>
-        </div>
-      </div>
-
-      <div className="timer-sets-list">
-        {recordedSets.map((set) => (
-          <div key={set.setNumber} className="timer-set-item">
-            <span>{set.setNumber}本目</span>
-            <span className="timer-set-time">{set.timeSeconds.toFixed(1)}s</span>
+          <div className="timer-display">
+            {formatTime(elapsedMs)}
           </div>
-        ))}
-      </div>
 
-      {recordedSets.length > 0 && (
-        <div className="timer-best-time">
-          ベスト: {Math.min(...recordedSets.map(s => s.timeSeconds)).toFixed(1)}s
-          （{recordedSets.length}セット完了）
-        </div>
-      )}
+          <div className="timer-controls">
+            {!isRunning ? (
+              <button className="timer-btn-start" onClick={handleStart}>
+                START
+              </button>
+            ) : (
+              <button className="timer-btn-stop" onClick={handleStop}>
+                STOP
+              </button>
+            )}
 
-      {recordedSets.length > 0 && !isRunning && !showSaveForm && (
-        <button 
-          className="btn btn-primary" 
-          style={{ width: '100%', minHeight: '56px', fontSize: '1.2rem', marginBottom: '20px' }}
-          onClick={() => setShowSaveForm(true)}
-        >
-          記録として保存
-        </button>
-      )}
-
-      {showSaveForm && (
-        <section className="card save-form" style={{ marginTop: '20px' }}>
-          <h3>📋 保存フォーム</h3>
-          
-          <div className="form-group">
-            <label>主観的強度 (RPE: 1-10)</label>
-            <div className="rpe-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`rpe-btn ${perceivedExertion === val ? 'active' : ''}`}
-                  onClick={() => setPerceivedExertion(val)}
-                >
-                  {val}
-                </button>
-              ))}
+            <div className="timer-secondary-row">
+              <button className="timer-btn-secondary" onClick={handleReset}>
+                リセット
+              </button>
+              <button className="timer-btn-secondary" onClick={handleDiscard}>
+                全破棄
+              </button>
             </div>
           </div>
 
-          <div className="form-group">
-            <label>疲労感 (1-10)</label>
-            <div className="rpe-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`rpe-btn ${fatigue === val ? 'active' : ''}`}
-                  onClick={() => setFatigue(val)}
-                >
-                  {val}
-                </button>
-              ))}
-            </div>
+          <div className="timer-sets-list">
+            {recordedSets.map((set) => (
+              <div key={set.setNumber} className="timer-set-item">
+                <span>{set.setNumber}本目</span>
+                <span className="timer-set-time">{set.timeSeconds.toFixed(1)}s</span>
+              </div>
+            ))}
           </div>
 
-          <div className="form-group">
-            <label>痛みの有無</label>
+          {recordedSets.length > 0 && (
+            <div className="timer-best-time">
+              ベスト: {Math.min(...recordedSets.map(s => s.timeSeconds)).toFixed(1)}s
+              （{recordedSets.length}セット完了）
+            </div>
+          )}
+
+          {recordedSets.length > 0 && !isRunning && !showSaveForm && (
             <button
-              type="button"
-              className={`quick-select-btn ${hasPain ? 'active' : ''}`}
-              style={{ width: '100%', justifyContent: 'center' }}
-              onClick={() => setHasPain(!hasPain)}
+              className="btn btn-primary"
+              style={{ width: '100%', minHeight: '56px', fontSize: '1.2rem', marginBottom: '20px' }}
+              onClick={() => setShowSaveForm(true)}
             >
-              {hasPain ? '🤕 痛みあり' : '✅ 痛みなし'}
+              記録として保存
             </button>
-          </div>
+          )}
 
-          <div className="form-group">
-            <label>メモ</label>
-            <textarea
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              rows={3}
-              placeholder="気づいたことなど"
-            />
-          </div>
+          {showSaveForm && (
+            <section className="card save-form" style={{ marginTop: '20px' }}>
+              <h3>📋 保存フォーム</h3>
 
-          <button 
-            className="btn btn-primary" 
-            style={{ width: '100%', minHeight: '64px', fontSize: '1.4rem' }}
-            onClick={handleSave}
-          >
-            保存する
-          </button>
-        </section>
+              <div className="form-group">
+                <label>主観的強度 (RPE: 1-10)</label>
+                <div className="rpe-grid">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      className={`rpe-btn ${perceivedExertion === val ? 'active' : ''}`}
+                      onClick={() => setPerceivedExertion(val)}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>疲労感 (1-10)</label>
+                <div className="rpe-grid">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      className={`rpe-btn ${fatigue === val ? 'active' : ''}`}
+                      onClick={() => setFatigue(val)}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>痛みの有無</label>
+                <button
+                  type="button"
+                  className={`quick-select-btn ${hasPain ? 'active' : ''}`}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  onClick={() => setHasPain(!hasPain)}
+                >
+                  {hasPain ? '🤕 痛みあり' : '✅ 痛みなし'}
+                </button>
+              </div>
+
+              <div className="form-group">
+                <label>メモ</label>
+                <textarea
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  rows={3}
+                  placeholder="気づいたことなど"
+                />
+              </div>
+
+              <button
+                className="btn btn-primary"
+                style={{ width: '100%', minHeight: '64px', fontSize: '1.4rem' }}
+                onClick={handleSave}
+              >
+                保存する
+              </button>
+            </section>
+          )}
+        </>
       )}
     </div>
   );
