@@ -14,13 +14,13 @@ function renderNav() {
 describe('BottomNav', () => {
   it('renders all navigation labels', () => {
     renderNav()
-    for (const label of ['今日', '計測', '記録', '履歴', 'グラフ', 'メニュー']) {
+    for (const label of ['今日', '記録', '履歴', 'グラフ', 'メニュー']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })
 
-  it('renders six navigation links', () => {
+  it('renders five navigation links', () => {
     renderNav()
-    expect(screen.getAllByRole('link')).toHaveLength(6)
+    expect(screen.getAllByRole('link')).toHaveLength(5)
   })
 })

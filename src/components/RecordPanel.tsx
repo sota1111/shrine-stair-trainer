@@ -14,13 +14,18 @@ const EXERCISE_TYPES: ExerciseType[] = [
   '休養',
 ];
 
-const RecordPage: React.FC = () => {
+interface RecordPanelProps {
+  weather: WeatherCondition;
+  setWeather: (w: WeatherCondition) => void;
+  roadCondition: RoadCondition;
+  setRoadCondition: (r: RoadCondition) => void;
+}
+
+const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCondition, setRoadCondition }) => {
   const navigate = useNavigate();
   const { addRecord } = useTrainingRecords();
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [weather, setWeather] = useState<WeatherCondition>('sunny');
-  const [roadCondition, setRoadCondition] = useState<RoadCondition>('dry');
   const [exercises, setExercises] = useState<ExerciseEntry[]>([
     { type: '70段ダッシュ', sets: [{ setNumber: 1, timeSeconds: 30 }] },
   ]);
@@ -80,7 +85,7 @@ const RecordPage: React.FC = () => {
     e.preventDefault();
     setShowValidation(true);
     if (!isValid()) return;
-    
+
     const newRecord: TrainingRecord = {
       id: Date.now().toString(),
       date,
@@ -101,17 +106,7 @@ const RecordPage: React.FC = () => {
   const isConditionDangerous = isDangerousCondition(weather, roadCondition);
 
   return (
-    <div className="record-page container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2>📝 トレーニング記録</h2>
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <button type="button" className="btn btn-secondary btn-lg" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => navigate('/timer')}>
-          ⏱️ タイム計測して記録する
-        </button>
-      </div>
-
+    <div className="record-panel">
       {isConditionDangerous && (
         <div className="warning-box">
           <p>⚠️ 路面不良のため一段飛ばし・二段飛ばしは推奨しません</p>
@@ -192,17 +187,17 @@ const RecordPage: React.FC = () => {
                 {ex.sets.map((set, setIdx) => (
                   <div key={setIdx} className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                     <label style={{ margin: 0, minWidth: '50px' }}>{set.setNumber}本目</label>
-                    <input 
-                      type="number" 
-                      step="0.1" 
-                      value={set.timeSeconds} 
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={set.timeSeconds}
                       onChange={(e) => handleSetTimeChange(exIdx, setIdx, parseFloat(e.target.value))}
                       style={{ flex: 1, padding: '10px', fontSize: '1rem' }}
                     />
                     <span style={{ fontSize: '1rem' }}>秒</span>
-                    <button 
-                      type="button" 
-                      className="btn btn-danger btn-sm" 
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
                       style={{ minHeight: '44px' }}
                       onClick={() => handleRemoveSet(exIdx, setIdx)}
                     >
@@ -231,10 +226,10 @@ const RecordPage: React.FC = () => {
           <div className="form-group">
             <label>主観的強度 (1-10)</label>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{perceivedExertion}</div>
-            <input 
-              type="range" min="1" max="10" 
-              value={perceivedExertion} 
-              onChange={(e) => setPerceivedExertion(parseInt(e.target.value))} 
+            <input
+              type="range" min="1" max="10"
+              value={perceivedExertion}
+              onChange={(e) => setPerceivedExertion(parseInt(e.target.value))}
               style={{ height: '32px', width: '100%' }}
             />
           </div>
@@ -242,10 +237,10 @@ const RecordPage: React.FC = () => {
           <div className="form-group">
             <label>疲労感 (1-10)</label>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{fatigue}</div>
-            <input 
-              type="range" min="1" max="10" 
-              value={fatigue} 
-              onChange={(e) => setFatigue(parseInt(e.target.value))} 
+            <input
+              type="range" min="1" max="10"
+              value={fatigue}
+              onChange={(e) => setFatigue(parseInt(e.target.value))}
               style={{ height: '32px', width: '100%' }}
             />
           </div>
@@ -264,9 +259,9 @@ const RecordPage: React.FC = () => {
 
           <div className="form-group">
             <label>メモ</label>
-            <textarea 
-              value={memo} 
-              onChange={(e) => setMemo(e.target.value)} 
+            <textarea
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
               rows={3}
               placeholder="気づいたことなど"
               style={{ padding: '12px', fontSize: '1rem' }}
@@ -288,4 +283,4 @@ const RecordPage: React.FC = () => {
   );
 };
 
-export default RecordPage;
+export default RecordPanel;
