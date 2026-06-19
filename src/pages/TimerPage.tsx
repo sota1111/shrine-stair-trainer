@@ -14,6 +14,31 @@ const EXERCISE_TYPES: ExerciseType[] = [
   '休養',
 ];
 
+const WEATHER_LABELS: Record<WeatherCondition, string> = {
+  sunny: '☀️ 晴',
+  cloudy: '☁️ 曇',
+  rainy: '🌧️ 雨',
+  'light-rain': '🌦️ 小雨',
+};
+
+const ROAD_LABELS: Record<RoadCondition, string> = {
+  dry: '🟢 乾燥',
+  wet: '🔵 湿潤',
+  rainy: '💧 雨',
+  slippery: '⚠️ 滑る',
+};
+
+const conditionChipStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '6px 12px',
+  borderRadius: '16px',
+  background: 'var(--color-primary)',
+  color: '#fff',
+  fontSize: '0.9rem',
+  fontWeight: 600,
+};
+
 const TimerPage: React.FC = () => {
   const navigate = useNavigate();
   const { addRecord } = useTrainingRecords();
@@ -111,64 +136,79 @@ const TimerPage: React.FC = () => {
   };
 
   const isConditionDangerous = isDangerousCondition(weather, roadCondition);
+  // Once a measurement session has begun (running or at least one set recorded),
+  // the weather / road / exercise are locked in. Collapse the selectors to a
+  // compact read-only summary so only the chosen values are shown (and the page
+  // needs less scrolling). They become editable again after a full discard.
+  const measurementStarted = isRunning || recordedSets.length > 0;
 
   return (
     <div className="timer-page container">
       <h2>⏱️ タイム計測</h2>
 
       <section className="card" style={{ marginBottom: '16px' }}>
-        <div className="form-group">
-          <label>天気</label>
-          <div className="quick-select-group">
-            {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map((w) => (
-              <button
-                key={w}
-                type="button"
-                className={`quick-select-btn ${weather === w ? 'active' : ''}`}
-                onClick={() => setWeather(w)}
-              >
-                {w === 'sunny' ? '☀️ 晴' : w === 'cloudy' ? '☁️ 曇' : w === 'rainy' ? '🌧️ 雨' : '🌦️ 小雨'}
-              </button>
-            ))}
+        {measurementStarted ? (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={conditionChipStyle}>{WEATHER_LABELS[weather]}</span>
+            <span style={conditionChipStyle}>{ROAD_LABELS[roadCondition]}</span>
+            <span style={conditionChipStyle}>{exerciseType}</span>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="form-group">
+              <label>天気</label>
+              <div className="quick-select-group">
+                {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    className={`quick-select-btn ${weather === w ? 'active' : ''}`}
+                    onClick={() => setWeather(w)}
+                  >
+                    {WEATHER_LABELS[w]}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="form-group">
-          <label>路面状態</label>
-          <div className="quick-select-group">
-            {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
-                onClick={() => setRoadCondition(r)}
-              >
-                {r === 'dry' ? '🟢 乾燥' : r === 'wet' ? '🔵 湿潤' : r === 'rainy' ? '💧 雨' : '⚠️ 滑る'}
-              </button>
-            ))}
-          </div>
-        </div>
+            <div className="form-group">
+              <label>路面状態</label>
+              <div className="quick-select-group">
+                {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
+                    onClick={() => setRoadCondition(r)}
+                  >
+                    {ROAD_LABELS[r]}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="form-group">
-          <label>種目</label>
-          <div className="quick-select-group" style={{ flexWrap: 'wrap' }}>
-            {EXERCISE_TYPES.map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={`quick-select-btn ${exerciseType === t ? 'active' : ''}`}
-                onClick={() => setExerciseType(t)}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          {isConditionDangerous && isDangerousExercise(exerciseType) && (
-            <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px' }}>
-              ⚠️ 危険なコンディションです
-            </p>
-          )}
-        </div>
+            <div className="form-group">
+              <label>種目</label>
+              <div className="quick-select-group" style={{ flexWrap: 'wrap' }}>
+                {EXERCISE_TYPES.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`quick-select-btn ${exerciseType === t ? 'active' : ''}`}
+                    onClick={() => setExerciseType(t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {isConditionDangerous && isDangerousExercise(exerciseType) && (
+                <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px' }}>
+                  ⚠️ 危険なコンディションです
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </section>
 
       {isConditionDangerous && (
