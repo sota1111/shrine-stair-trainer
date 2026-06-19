@@ -7,10 +7,6 @@ export default function BottomNav() {
         <span className="bottom-nav-icon">🏠</span>
         <span className="bottom-nav-label">今日</span>
       </NavLink>
-      <NavLink to="/timer" className={({ isActive }) => isActive ? 'bottom-nav-item active' : 'bottom-nav-item'}>
-        <span className="bottom-nav-icon">⏱️</span>
-        <span className="bottom-nav-label">計測</span>
-      </NavLink>
       <NavLink to="/record" className={({ isActive }) => isActive ? 'bottom-nav-item active' : 'bottom-nav-item'}>
         <span className="bottom-nav-icon">📝</span>
         <span className="bottom-nav-label">記録</span>

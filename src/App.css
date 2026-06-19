@@ -202,6 +202,35 @@ body {
   background: rgba(255,255,255,0.3);
 }
 
+/* Training Page (記録・計測 統合) tabs */
+.training-page { padding: 8px 0; }
+
+.training-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.training-tab {
+  flex: 1;
+  background: #ecf0f1;
+  color: var(--color-text);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 52px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.training-tab.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
 /* Timer Page */
 .timer-page { padding: 8px 0; }
 

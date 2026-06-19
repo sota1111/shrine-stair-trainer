@@ -39,13 +39,18 @@ const conditionChipStyle: React.CSSProperties = {
   fontWeight: 600,
 };
 
-const TimerPage: React.FC = () => {
+interface TimerPanelProps {
+  weather: WeatherCondition;
+  setWeather: (w: WeatherCondition) => void;
+  roadCondition: RoadCondition;
+  setRoadCondition: (r: RoadCondition) => void;
+}
+
+const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondition, setRoadCondition }) => {
   const navigate = useNavigate();
   const { addRecord } = useTrainingRecords();
 
   const [exerciseType, setExerciseType] = useState<ExerciseType>('70段ダッシュ');
-  const [weather, setWeather] = useState<WeatherCondition>('sunny');
-  const [roadCondition, setRoadCondition] = useState<RoadCondition>('dry');
   const [confirmed, setConfirmed] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -144,9 +149,7 @@ const TimerPage: React.FC = () => {
   // again after a full discard (全破棄).
 
   return (
-    <div className="timer-page container">
-      <h2>⏱️ タイム計測</h2>
-
+    <div className="timer-panel">
       <section className="card" style={{ marginBottom: '16px' }}>
         {confirmed ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -360,4 +363,4 @@ const TimerPage: React.FC = () => {
   );
 };
 
-export default TimerPage;
+export default TimerPanel;
