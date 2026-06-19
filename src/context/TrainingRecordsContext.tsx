@@ -3,6 +3,7 @@ import { useAuth } from './useAuth';
 import { TrainingRecordsContext } from './trainingRecordsContextValue';
 import { apiClient } from '../lib/apiClient';
 import * as offlineQueue from '../lib/offlineQueue';
+import { sampleData } from '../data/sampleData';
 import type { TrainingRecord } from '../types';
 
 const STORAGE_KEY = 'shrine-stair-trainer-records';
@@ -179,9 +180,15 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // When an authenticated user has no real records yet, surface the May 2026
+  // sample data as a read-only preview so the UI can be evaluated. As soon as a
+  // real record exists (optimistically or from the server), only real records
+  // are shown. Sample data is never persisted to the server or the offline queue.
+  const displayRecords = uid && !loading && records.length === 0 ? sampleData : records;
+
   return (
     <TrainingRecordsContext.Provider
-      value={{ records, loading, error, addRecord, isOnline, pendingSyncCount }}
+      value={{ records: displayRecords, loading, error, addRecord, isOnline, pendingSyncCount }}
     >
       {children}
     </TrainingRecordsContext.Provider>

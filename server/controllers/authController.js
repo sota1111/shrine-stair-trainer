@@ -75,7 +75,7 @@ export const login = async (req, res) => {
 
   const cookieValue = signSession({ uid, email: verifiedEmail });
   res.setHeader('Set-Cookie', buildSessionCookie(cookieValue));
-  return res.json({ success: true, email: verifiedEmail });
+  return res.json({ success: true, email: verifiedEmail, uid });
 };
 
 // POST /api/auth/logout — clears the session cookie.
