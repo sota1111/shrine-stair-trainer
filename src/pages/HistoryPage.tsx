@@ -141,6 +141,21 @@ const HistoryPage: React.FC = () => {
                   <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>
                     {record.date} ({record.dayOfWeek})
                   </span>
+                  {record.id.startsWith('sample-') && (
+                    <span
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '0.7rem',
+                        padding: '2px 6px',
+                        borderRadius: '8px',
+                        background: 'var(--color-muted, #888)',
+                        color: '#fff',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      サンプル
+                    </span>
+                  )}
                   <span style={{ marginLeft: '8px', fontSize: '1.2rem' }}>
                     {weatherIcons[record.weather]}
                   </span>

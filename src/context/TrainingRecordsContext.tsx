@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useAuth } from './useAuth';
 import { TrainingRecordsContext } from './trainingRecordsContextValue';
 import { apiClient } from '../lib/apiClient';
@@ -180,11 +180,17 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // When an authenticated user has no real records yet, surface the May 2026
-  // sample data as a read-only preview so the UI can be evaluated. As soon as a
-  // real record exists (optimistically or from the server), only real records
-  // are shown. Sample data is never persisted to the server or the offline queue.
-  const displayRecords = uid && !loading && records.length === 0 ? sampleData : records;
+  // Surface the May 2026 sample data so the UI can always be evaluated, even
+  // after the user has saved some real records. Sample entries are merged in for
+  // any date that does not already have a real record, so real data always wins
+  // on a collision and is never duplicated. Sample data carries the `sample-`
+  // id prefix and is never persisted to the server or the offline queue.
+  const displayRecords = useMemo(() => {
+    if (!uid || loading) return records;
+    const realDates = new Set(records.map(r => r.date));
+    const sampleToShow = sampleData.filter(s => !realDates.has(s.date));
+    return [...records, ...sampleToShow];
+  }, [uid, loading, records]);
 
   return (
     <TrainingRecordsContext.Provider

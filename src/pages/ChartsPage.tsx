@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
@@ -7,14 +7,35 @@ import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import type { TrainingRecord } from '../types';
 
+const formatMonthLabel = (ym: string): string => {
+  const [y, m] = ym.split('-');
+  return `${y}年${Number(m)}月`;
+};
+
 const ChartsPage: React.FC = () => {
   const { records } = useTrainingRecords();
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+
+  // Months (YYYY-MM) that actually have records, newest first.
+  const availableMonths = useMemo(() => {
+    const set = new Set(records.map(r => r.date.substring(0, 7)));
+    return Array.from(set).sort((a, b) => b.localeCompare(a));
+  }, [records]);
+
+  // Default to the most recent month with data until the user picks one.
+  const activeMonth = selectedMonth || availableMonths[0] || '';
+
+  // All charts/analysis below operate on the selected month only.
+  const records_ = useMemo(
+    () => records.filter(r => r.date.substring(0, 7) === activeMonth),
+    [records, activeMonth],
+  );
 
   const dashRecords = useMemo(() => {
-    return records
+    return records_
       .filter(r => r.exercises.some(ex => ex.type === '70段ダッシュ'))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [records]);
+  }, [records_]);
 
   // Chart 1 & 2 Data
   const timeData = useMemo(() => {
@@ -34,7 +55,7 @@ const ChartsPage: React.FC = () => {
   // Chart 3 Data: Weekly sets count
   const weeklyData = useMemo(() => {
     const weeks: Record<string, number> = {};
-    records.forEach(r => {
+    records_.forEach(r => {
       const d = new Date(r.date);
       const day = d.getDay();
       const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
@@ -45,17 +66,17 @@ const ChartsPage: React.FC = () => {
       weeks[weekKey] = (weeks[weekKey] || 0) + setsCount;
     });
     return Object.entries(weeks).map(([name, count]) => ({ name, count }));
-  }, [records]);
+  }, [records_]);
 
   // Chart 4 Data: Fatigue
   const fatigueData = useMemo(() => {
-    return [...records]
+    return [...records_]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map(r => ({
         date: r.date.substring(5),
         fatigue: r.fatigue
       }));
-  }, [records]);
+  }, [records_]);
 
   // Chart 5 Data: Road condition vs Avg Best Time
   const roadConditionData = useMemo(() => {
@@ -95,15 +116,15 @@ const ChartsPage: React.FC = () => {
     const trend = secondAvg - firstAvg;
 
     // Fatigue warning
-    const last7 = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
+    const last7 = [...records_].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
     const fatigueWarning = last7.filter(r => r.fatigue >= 8).length >= 3;
 
     // Pain warning
-    const last14 = [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 14);
+    const last14 = [...records_].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 14);
     const painCount = last14.filter(r => r.hasPain).length;
 
     // Rainy danger check
-    const dangerousRainy = records.some(r => 
+    const dangerousRainy = records_.some(r =>
       isDangerousCondition(r.weather, r.roadCondition) && 
       r.exercises.some(ex => isDangerousExercise(ex.type))
     );
@@ -135,11 +156,29 @@ const ChartsPage: React.FC = () => {
       dangerousRainy,
       recentBestImproved
     };
-  }, [dashRecords, records]);
+  }, [dashRecords, records_]);
 
   return (
     <div className="charts-page">
       <h2>📊 トレーニング分析</h2>
+
+      <div className="form-group" style={{ marginBottom: '16px' }}>
+        <label htmlFor="month-select">対象月</label>
+        {availableMonths.length === 0 ? (
+          <p style={{ color: 'var(--color-muted)' }}>記録がありません</p>
+        ) : (
+          <select
+            id="month-select"
+            className="filter-select"
+            value={activeMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            {availableMonths.map((m) => (
+              <option key={m} value={m}>{formatMonthLabel(m)}</option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {analysis && (
         <div className="analysis-card">
