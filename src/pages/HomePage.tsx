@@ -1,6 +1,6 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
-import type { TrainingRecord } from '../types';
+import { calculateStreak } from '../utils/stats';
 
 export default function HomePage() {
   const { records } = useTrainingRecords();
@@ -85,48 +85,7 @@ export default function HomePage() {
   const painCount = last30Records.filter(r => r.hasPain).length;
 
   // 継続日数
-  const getStreak = (recs: TrainingRecord[]) => {
-    if (recs.length === 0) return 0;
-    
-    // Sort records by date descending
-    const sorted = [...recs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    // Use the most recent record date as starting point if it's today or yesterday
-    const latestDate = new Date(sorted[0].date);
-    latestDate.setHours(0,0,0,0);
-    
-    const now = new Date();
-    now.setHours(0,0,0,0);
-    
-    const diffDays = Math.floor((now.getTime() - latestDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays > 1) return 0; // Streak broken
-
-    let streak = 0;
-    const currentDate = new Date(latestDate);
-
-    // Map records by date string for easy lookup
-    const recordMap: Record<string, TrainingRecord[]> = {};
-    sorted.forEach(r => {
-      if (!recordMap[r.date]) recordMap[r.date] = [];
-      recordMap[r.date].push(r);
-    });
-
-    while (true) {
-      const dateStr = currentDate.toISOString().split('T')[0];
-      const dayRecords = recordMap[dateStr];
-      
-      if (dayRecords && dayRecords.some(r => r.exercises.some(e => e.type !== '休養'))) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    return streak;
-  };
-
-  const streakDays = getStreak(records);
+  const streakDays = calculateStreak(records);
 
   const dateStr = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 

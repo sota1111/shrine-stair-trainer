@@ -19,6 +19,10 @@ export default function BottomNav() {
         <span className="bottom-nav-icon">📊</span>
         <span className="bottom-nav-label">グラフ</span>
       </NavLink>
+      <NavLink to="/summary" className={({ isActive }) => isActive ? 'bottom-nav-item active' : 'bottom-nav-item'}>
+        <span className="bottom-nav-icon">📈</span>
+        <span className="bottom-nav-label">サマリ</span>
+      </NavLink>
       <NavLink to="/menu" className={({ isActive }) => isActive ? 'bottom-nav-item active' : 'bottom-nav-item'}>
         <span className="bottom-nav-icon">📅</span>
         <span className="bottom-nav-label">メニュー</span>

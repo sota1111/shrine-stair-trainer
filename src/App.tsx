@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import TrainingPage from './pages/TrainingPage';
 import HistoryPage from './pages/HistoryPage';
 import ChartsPage from './pages/ChartsPage';
+import SummaryPage from './pages/SummaryPage';
 import WeeklyMenuPage from './pages/WeeklyMenuPage';
 import LoginPage from './pages/LoginPage';
 import BottomNav from './components/BottomNav';
@@ -26,6 +27,7 @@ function AppLayout() {
               <NavLink to="/record">📝 記録・計測</NavLink>
               <NavLink to="/history">📋 履歴</NavLink>
               <NavLink to="/charts">📊 グラフ</NavLink>
+              <NavLink to="/summary">📈 サマリ</NavLink>
               <NavLink to="/menu">📅 メニュー</NavLink>
             </nav>
             <h1>⛩️ 階段トレーニング</h1>
@@ -45,6 +47,7 @@ function AppLayout() {
           <Route path="/timer" element={<Navigate to="/record" replace />} />
           <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
           <Route path="/charts" element={<ProtectedRoute><ChartsPage /></ProtectedRoute>} />
+          <Route path="/summary" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
           <Route path="/menu" element={<ProtectedRoute><WeeklyMenuPage /></ProtectedRoute>} />
         </Routes>
       </main>
