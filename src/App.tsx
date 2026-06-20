@@ -22,6 +22,7 @@ function AppLayout() {
       <header className="app-header">
         <div className="app-header-inner">
           <div>
+            <h1>⛩️ 階段トレーニング</h1>
             <nav className="app-nav">
               <NavLink to="/home">🏠 ホーム</NavLink>
               <NavLink to="/record">📝 記録・計測</NavLink>
@@ -30,7 +31,6 @@ function AppLayout() {
               <NavLink to="/summary">📈 サマリ</NavLink>
               <NavLink to="/menu">📅 メニュー</NavLink>
             </nav>
-            <h1>⛩️ 階段トレーニング</h1>
           </div>
           {isAuthenticated && (
             <button className="logout-btn" onClick={logout}>ログアウト</button>
