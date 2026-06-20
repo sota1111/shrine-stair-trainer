@@ -1,16 +1,28 @@
 import React, { useMemo, useState } from 'react';
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell
+  BarChart, Bar, Cell, Legend
 } from 'recharts';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
-import type { TrainingRecord } from '../types';
+import type { TrainingRecord, ExerciseType } from '../types';
 
 const formatMonthLabel = (ym: string): string => {
   const [y, m] = ym.split('-');
   return `${y}年${Number(m)}月`;
 };
+
+// Stable, distinguishable color per training menu for the multi-line time chart.
+const MENU_COLORS: Record<ExerciseType, string> = {
+  '70段ダッシュ': 'var(--color-primary)',
+  '一段ずつ': '#3498db',
+  '一段飛ばし': '#9b59b6',
+  '二段飛ばし': '#e67e22',
+  '軽め': '#2ecc71',
+  '屋内ジャンプ': '#e74c3c',
+  '休養': '#95a5a6',
+};
+const FALLBACK_COLORS = ['#1abc9c', '#f1c40f', '#34495e', '#e84393', '#00b894'];
 
 const ChartsPage: React.FC = () => {
   const { records } = useTrainingRecords();
@@ -51,6 +63,36 @@ const ChartsPage: React.FC = () => {
       };
     });
   }, [dashRecords]);
+
+  // Chart 1 (multi-menu): per-date best time for every menu that has timed sets this month.
+  const menuTimeData = useMemo(() => {
+    const byDate: Record<string, Record<string, number>> = {};
+    const menuSet = new Set<ExerciseType>();
+    [...records_]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .forEach(r => {
+        const key = r.date.substring(5); // MM-DD
+        r.exercises.forEach(ex => {
+          const times = ex.sets.map(s => s.timeSeconds).filter(t => t > 0);
+          if (times.length === 0) return;
+          const best = Math.min(...times);
+          if (!byDate[key]) byDate[key] = {};
+          byDate[key][ex.type] =
+            byDate[key][ex.type] !== undefined
+              ? Math.min(byDate[key][ex.type], best)
+              : best;
+          menuSet.add(ex.type);
+        });
+      });
+    const rows = Object.entries(byDate).map(([date, menus]) => {
+      const row: Record<string, number | string> = { date };
+      Object.entries(menus).forEach(([m, v]) => {
+        row[m] = parseFloat(v.toFixed(1));
+      });
+      return row;
+    });
+    return { rows, menus: Array.from(menuSet) };
+  }, [records_]);
 
   // Chart 3 Data: Weekly sets count
   const weeklyData = useMemo(() => {
@@ -210,16 +252,31 @@ const ChartsPage: React.FC = () => {
       )}
 
       <div className="chart-container card">
-        <div className="chart-title">70段最速タイム推移 (秒)</div>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={timeData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
-            <Tooltip />
-            <Line type="monotone" dataKey="best" stroke="var(--color-primary)" strokeWidth={2} name="最速" />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="chart-title">メニュー別 最速タイム推移 (秒)</div>
+        {menuTimeData.menus.length === 0 ? (
+          <p className="chart-summary">タイム記録がありません</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={menuTimeData.rows}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
+              <Tooltip />
+              <Legend />
+              {menuTimeData.menus.map((m, i) => (
+                <Line
+                  key={m}
+                  type="monotone"
+                  dataKey={m}
+                  name={m}
+                  stroke={MENU_COLORS[m] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length]}
+                  strokeWidth={2}
+                  connectNulls
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        )}
         {dashRecords.length > 0 && (
           <p className="chart-summary">
             {analysis?.recentBestImproved ? '✅ 直近7日でベスト更新あり' : '📊 直近7日でベスト更新なし'}
