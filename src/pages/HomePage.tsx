@@ -1,10 +1,12 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { calculateStreak } from '../utils/stats';
+import { useI18n } from '../i18n/useI18n';
 
 export default function HomePage() {
   const { records } = useTrainingRecords();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   // Helper to format timeSeconds to mm:ss
   const formatTime = (seconds: number) => {
@@ -93,25 +95,25 @@ export default function HomePage() {
     <div className="home-page">
       {/* Today's Status Section */}
       <div className="card home-today-card">
-        <h2>⛩️ 今日の状態</h2>
+        <h2>{t('home.todayStatus')}</h2>
         <p className="home-today-date">{dateStr}</p>
-        
+
         {/* Quick action buttons */}
         <div className="home-quick-actions">
-          <button onClick={() => navigate('/timer')} className="btn btn-primary btn-lg home-action-btn">⏱️ 計測開始</button>
-          <button onClick={() => navigate('/record')} className="btn btn-secondary btn-lg home-action-btn">📝 記録入力</button>
-          <button onClick={() => navigate('/history')} className="btn btn-secondary btn-lg home-action-btn">📋 履歴を見る</button>
+          <button onClick={() => navigate('/timer')} className="btn btn-primary btn-lg home-action-btn">{t('home.startTimer')}</button>
+          <button onClick={() => navigate('/record')} className="btn btn-secondary btn-lg home-action-btn">{t('home.recordInput')}</button>
+          <button onClick={() => navigate('/history')} className="btn btn-secondary btn-lg home-action-btn">{t('home.viewHistory')}</button>
         </div>
-        
+
         {/* Today's recommended menu link */}
         <p className="home-menu-hint">
-          📅 <NavLink to="/menu">今日のメニューを確認</NavLink>
+          📅 <NavLink to="/menu">{t('home.checkTodayMenu')}</NavLink>
         </p>
       </div>
 
       {/* Dashboard Summary */}
       <div className="card">
-        <h2>📊 サマリー</h2>
+        <h2>{t('home.summary')}</h2>
         <div className="summary-grid">
           {/* 2-column grid of summary cards */}
           <div className="summary-card">

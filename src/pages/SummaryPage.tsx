@@ -12,11 +12,13 @@ import {
   availableYears,
 } from '../utils/stats';
 import { achievementRatio } from '../utils/goals';
+import { useI18n } from '../i18n/useI18n';
 
 const formatTime = (seconds: number | null): string =>
   seconds === null ? '-' : `${seconds.toFixed(1)}秒`;
 
 const SummaryPage: React.FC = () => {
+  const { t } = useI18n();
   const { records } = useTrainingRecords();
   const { goals, updateGoals } = useGoals();
 
@@ -61,7 +63,7 @@ const SummaryPage: React.FC = () => {
 
   return (
     <div className="summary-page">
-      <h2>📈 サマリ・目標</h2>
+      <h2>{t('summary.title')}</h2>
 
       {/* Streak */}
       <div className="card">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { WeatherCondition, RoadCondition, ExerciseType } from '../types';
 import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
+import { useI18n } from '../i18n/useI18n';
 
 interface MenuDay {
   day: string;
@@ -21,6 +22,7 @@ const WEEKLY_MENU: MenuDay[] = [
 ];
 
 const WeeklyMenuPage: React.FC = () => {
+  const { t } = useI18n();
   const [weather, setWeather] = useState<WeatherCondition>('sunny');
   const [roadCondition, setRoadCondition] = useState<RoadCondition>('dry');
 
@@ -48,7 +50,7 @@ const WeeklyMenuPage: React.FC = () => {
 
   return (
     <div className="weekly-menu-page">
-      <h2>📅 週間トレーニングメニュー</h2>
+      <h2>{t('menu.title')}</h2>
 
       <div className="card" style={{ marginBottom: '16px' }}>
         <h3 style={{ margin: '0 0 8px 0' }}>本日の天気・路面状態</h3>

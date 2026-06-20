@@ -207,6 +207,43 @@ body {
   background: rgba(255,255,255,0.3);
 }
 
+/* Language toggle (JP | EN) */
+.app-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lang-toggle-btn {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: var(--radius);
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.lang-toggle-btn.active {
+  background: white;
+  color: var(--color-primary, #b5453a);
+}
+
+.lang-toggle-sep {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.75rem;
+}
+
 /* Training Page (記録・計測 統合) tabs */
 .training-page { padding: 8px 0; }
 

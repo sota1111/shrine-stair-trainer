@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import type { WeatherCondition, RoadCondition } from '../types';
 import TimerPanel from '../components/TimerPanel';
 import RecordPanel from '../components/RecordPanel';
+import { useI18n } from '../i18n/useI18n';
 
 type TrainingTab = 'timer' | 'manual';
 
 const TrainingPage: React.FC = () => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TrainingTab>('timer');
 
   // 天気 / 路面状態 are shared across both tabs so switching keeps the chosen condition.
@@ -14,7 +16,7 @@ const TrainingPage: React.FC = () => {
 
   return (
     <div className="training-page container">
-      <h2>📝 記録・計測</h2>
+      <h2>{t('training.title')}</h2>
 
       <div className="training-tabs" role="tablist">
         <button
@@ -24,7 +26,7 @@ const TrainingPage: React.FC = () => {
           className={`training-tab ${activeTab === 'timer' ? 'active' : ''}`}
           onClick={() => setActiveTab('timer')}
         >
-          ⏱️ 計測
+          {t('training.timer')}
         </button>
         <button
           type="button"
@@ -33,7 +35,7 @@ const TrainingPage: React.FC = () => {
           className={`training-tab ${activeTab === 'manual' ? 'active' : ''}`}
           onClick={() => setActiveTab('manual')}
         >
-          📝 手入力
+          {t('training.manual')}
         </button>
       </div>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
+import { useI18n } from '../i18n/useI18n';
 import type { ExerciseEntry } from '../types';
 
 const weatherIcons = {
@@ -12,6 +13,7 @@ const weatherIcons = {
 type FilterType = 'all' | 'pain' | 'rainy';
 
 const HistoryPage: React.FC = () => {
+  const { t } = useI18n();
   const { records } = useTrainingRecords();
   const [filter, setFilter] = useState<FilterType>('all');
   const [exerciseFilter, setExerciseFilter] = useState<string>('all');
@@ -98,9 +100,9 @@ const HistoryPage: React.FC = () => {
   return (
     <div className="history-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ margin: 0 }}>📋 記録履歴</h2>
+        <h2 style={{ margin: 0 }}>{t('history.title')}</h2>
         <button className="btn btn-secondary btn-sm" onClick={exportCSV}>
-          📥 CSVエクスポート
+          {t('history.exportCsv')}
         </button>
       </div>
 
