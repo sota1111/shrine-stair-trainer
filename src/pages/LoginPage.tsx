@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+import { useI18n } from '../i18n/useI18n'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -8,6 +9,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent) => {
@@ -29,10 +31,10 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h2>🔐 ログイン</h2>
+        <h2>{t('login.title')}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">メールアドレス</label>
+            <label htmlFor="email">{t('login.email')}</label>
             <input
               type="email"
               id="email"
@@ -43,7 +45,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">パスワード</label>
+            <label htmlFor="password">{t('login.password')}</label>
             <input
               type="password"
               id="password"
@@ -59,7 +61,7 @@ export default function LoginPage() {
             </div>
           )}
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'ログイン中...' : 'ログイン'}
+            {loading ? t('login.loggingIn') : t('login.submit')}
           </button>
         </form>
       </div>

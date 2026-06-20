@@ -4,6 +4,7 @@ import {
   BarChart, Bar, Cell, Legend
 } from 'recharts';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
+import { useI18n } from '../i18n/useI18n';
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import type { TrainingRecord, ExerciseType } from '../types';
 
@@ -25,6 +26,7 @@ const MENU_COLORS: Record<ExerciseType, string> = {
 const FALLBACK_COLORS = ['#1abc9c', '#f1c40f', '#34495e', '#e84393', '#00b894'];
 
 const ChartsPage: React.FC = () => {
+  const { t } = useI18n();
   const { records } = useTrainingRecords();
   const [selectedMonth, setSelectedMonth] = useState<string>('');
 
@@ -202,7 +204,7 @@ const ChartsPage: React.FC = () => {
 
   return (
     <div className="charts-page">
-      <h2>📊 トレーニング分析</h2>
+      <h2>{t('charts.title')}</h2>
 
       <div className="form-group" style={{ marginBottom: '16px' }}>
         <label htmlFor="month-select">対象月</label>

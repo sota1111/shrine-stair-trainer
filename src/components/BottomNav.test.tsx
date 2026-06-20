@@ -2,12 +2,15 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import BottomNav from './BottomNav'
+import { I18nProvider } from '../i18n/I18nProvider'
 
 function renderNav() {
   return render(
-    <MemoryRouter>
-      <BottomNav />
-    </MemoryRouter>,
+    <I18nProvider>
+      <MemoryRouter>
+        <BottomNav />
+      </MemoryRouter>
+    </I18nProvider>,
   )
 }
 

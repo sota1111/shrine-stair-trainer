@@ -12,29 +12,36 @@ import WeeklyMenuPage from './pages/WeeklyMenuPage';
 import LoginPage from './pages/LoginPage';
 import BottomNav from './components/BottomNav';
 import SyncStatusBanner from './components/SyncStatusBanner';
+import LanguageToggle from './components/LanguageToggle';
+import { I18nProvider } from './i18n/I18nProvider';
+import { useI18n } from './i18n/useI18n';
 import './App.css';
 
 function AppLayout() {
   const { isAuthenticated, logout } = useAuth();
+  const { t } = useI18n();
 
   return (
     <div className="app">
       <header className="app-header">
         <div className="app-header-inner">
           <div>
-            <h1>⛩️ 階段トレーニング</h1>
+            <h1>{t('app.title')}</h1>
             <nav className="app-nav">
-              <NavLink to="/home">🏠 ホーム</NavLink>
-              <NavLink to="/record">📝 記録・計測</NavLink>
-              <NavLink to="/history">📋 履歴</NavLink>
-              <NavLink to="/charts">📊 グラフ</NavLink>
-              <NavLink to="/summary">📈 サマリ</NavLink>
-              <NavLink to="/menu">📅 メニュー</NavLink>
+              <NavLink to="/home">{t('nav.home')}</NavLink>
+              <NavLink to="/record">{t('nav.record')}</NavLink>
+              <NavLink to="/history">{t('nav.history')}</NavLink>
+              <NavLink to="/charts">{t('nav.charts')}</NavLink>
+              <NavLink to="/summary">{t('nav.summary')}</NavLink>
+              <NavLink to="/menu">{t('nav.menu')}</NavLink>
             </nav>
           </div>
-          {isAuthenticated && (
-            <button className="logout-btn" onClick={logout}>ログアウト</button>
-          )}
+          <div className="app-header-actions">
+            <LanguageToggle />
+            {isAuthenticated && (
+              <button className="logout-btn" onClick={logout}>{t('nav.logout')}</button>
+            )}
+          </div>
         </div>
       </header>
       <SyncStatusBanner />
@@ -59,11 +66,13 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <TrainingRecordsProvider>
-          <AppLayout />
-        </TrainingRecordsProvider>
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <TrainingRecordsProvider>
+            <AppLayout />
+          </TrainingRecordsProvider>
+        </AuthProvider>
+      </I18nProvider>
     </BrowserRouter>
   );
 }
