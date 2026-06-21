@@ -180,6 +180,52 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateRecord = async (record: TrainingRecord) => {
+    if (!uid) return;
+
+    // Optimistic update: replace the matching record and keep the list sorted.
+    setRecords(prev =>
+      prev
+        .map(r => (r.id === record.id ? record : r))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    );
+
+    try {
+      await apiClient.putRecord(record);
+    } catch (err) {
+      if (isConnectivityError(err)) {
+        // Offline: persist the upsert to the queue and sync on reconnect.
+        await offlineQueue.enqueue(record);
+        await refreshPendingCount();
+        return;
+      }
+      console.error('Error updating record:', err);
+      setError('記録の更新に失敗しました');
+      throw err;
+    }
+  };
+
+  const deleteRecord = async (id: string) => {
+    if (!uid) return;
+
+    // Snapshot for rollback — delete is online-only (the offline queue only
+    // supports upserts), so revert the optimistic removal if the request fails.
+    let snapshot: TrainingRecord[] = [];
+    setRecords(prev => {
+      snapshot = prev;
+      return prev.filter(r => r.id !== id);
+    });
+
+    try {
+      await apiClient.deleteRecord(id);
+    } catch (err) {
+      console.error('Error deleting record:', err);
+      setRecords(snapshot);
+      setError('記録の削除に失敗しました');
+      throw err;
+    }
+  };
+
   // Surface the May 2026 sample data so the UI can always be evaluated, even
   // after the user has saved some real records. Sample entries are merged in for
   // any date that does not already have a real record, so real data always wins
@@ -194,7 +240,7 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
 
   return (
     <TrainingRecordsContext.Provider
-      value={{ records: displayRecords, loading, error, addRecord, isOnline, pendingSyncCount }}
+      value={{ records: displayRecords, loading, error, addRecord, updateRecord, deleteRecord, isOnline, pendingSyncCount }}
     >
       {children}
     </TrainingRecordsContext.Provider>
