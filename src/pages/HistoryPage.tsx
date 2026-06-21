@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { useI18n } from '../i18n/useI18n';
 import { exerciseLabel } from '../i18n/exerciseLabels';
-import type { ExerciseEntry } from '../types';
+import EditRecordModal from '../components/EditRecordModal';
+import type { ExerciseEntry, TrainingRecord } from '../types';
 
 const weatherIcons = {
   sunny: '☀️',
@@ -15,9 +16,19 @@ type FilterType = 'all' | 'pain' | 'rainy';
 
 const HistoryPage: React.FC = () => {
   const { t, lang } = useI18n();
-  const { records } = useTrainingRecords();
+  const { records, deleteRecord } = useTrainingRecords();
   const [filter, setFilter] = useState<FilterType>('all');
   const [exerciseFilter, setExerciseFilter] = useState<string>('all');
+  const [editingRecord, setEditingRecord] = useState<TrainingRecord | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(t('history.confirmDelete'))) return;
+    try {
+      await deleteRecord(id);
+    } catch {
+      // Error surfaced via context error state.
+    }
+  };
 
   const sortedRecords = [...records].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -219,9 +230,32 @@ const HistoryPage: React.FC = () => {
                   {record.memo}
                 </div>
               )}
+
+              {!record.id.startsWith('sample-') && (
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '12px' }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ minHeight: '44px' }}
+                    onClick={() => setEditingRecord(record)}
+                  >
+                    {t('history.edit')}
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    style={{ minHeight: '44px' }}
+                    onClick={() => handleDelete(record.id)}
+                  >
+                    {t('history.delete')}
+                  </button>
+                </div>
+              )}
             </div>
           );
         })
+      )}
+
+      {editingRecord && (
+        <EditRecordModal record={editingRecord} onClose={() => setEditingRecord(null)} />
       )}
     </div>
   );
