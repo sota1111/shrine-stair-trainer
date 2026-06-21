@@ -1,4 +1,5 @@
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
+import { useI18n } from '../i18n/useI18n';
 
 /**
  * Minimal connectivity / sync indicator. Shown only when the app is offline or
@@ -7,14 +8,15 @@ import { useTrainingRecords } from '../hooks/useTrainingRecords';
  */
 export default function SyncStatusBanner() {
   const { isOnline, pendingSyncCount } = useTrainingRecords();
+  const { t } = useI18n();
 
   if (isOnline && pendingSyncCount === 0) return null;
 
   const message = !isOnline
     ? pendingSyncCount > 0
-      ? `オフライン中 — 未同期の記録 ${pendingSyncCount} 件は復帰時に同期されます`
-      : 'オフライン中 — 記録はこの端末に保存され、復帰時に同期されます'
-    : `未同期の記録を同期中… 残り ${pendingSyncCount} 件`;
+      ? t('sync.offlinePending').replace('{n}', String(pendingSyncCount))
+      : t('sync.offline')
+    : t('sync.syncing').replace('{n}', String(pendingSyncCount));
 
   return (
     <div

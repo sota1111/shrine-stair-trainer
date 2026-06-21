@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { useI18n } from '../i18n/useI18n';
+import { exerciseLabel } from '../i18n/exerciseLabels';
 import type { ExerciseEntry } from '../types';
 
 const weatherIcons = {
@@ -13,7 +14,7 @@ const weatherIcons = {
 type FilterType = 'all' | 'pain' | 'rainy';
 
 const HistoryPage: React.FC = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { records } = useTrainingRecords();
   const [filter, setFilter] = useState<FilterType>('all');
   const [exerciseFilter, setExerciseFilter] = useState<string>('all');
@@ -108,31 +109,31 @@ const HistoryPage: React.FC = () => {
 
       <div className="history-filters">
         <div className="filter-group">
-          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>すべて</button>
-          <button className={`filter-btn ${filter === 'pain' ? 'active' : ''}`} onClick={() => setFilter('pain')}>痛みあり</button>
-          <button className={`filter-btn ${filter === 'rainy' ? 'active' : ''}`} onClick={() => setFilter('rainy')}>雨天のみ</button>
+          <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{t('history.filterAll')}</button>
+          <button className={`filter-btn ${filter === 'pain' ? 'active' : ''}`} onClick={() => setFilter('pain')}>{t('history.filterPain')}</button>
+          <button className={`filter-btn ${filter === 'rainy' ? 'active' : ''}`} onClick={() => setFilter('rainy')}>{t('history.filterRainy')}</button>
         </div>
         <div className="filter-group" style={{ marginTop: '8px' }}>
-          <select 
+          <select
             value={exerciseFilter}
             onChange={(e) => setExerciseFilter(e.target.value)}
             className="filter-select"
           >
-            <option value="all">全種目</option>
-            <option value="70段ダッシュ">70段ダッシュ</option>
-            <option value="一段ずつ">一段ずつ</option>
-            <option value="一段飛ばし">一段飛ばし</option>
-            <option value="二段飛ばし">二段飛ばし</option>
-            <option value="軽め">軽め</option>
-            <option value="屋内ジャンプ">屋内ジャンプ</option>
-            <option value="休養">休養</option>
+            <option value="all">{t('history.exerciseAll')}</option>
+            <option value="70段ダッシュ">{exerciseLabel('70段ダッシュ', lang)}</option>
+            <option value="一段ずつ">{exerciseLabel('一段ずつ', lang)}</option>
+            <option value="一段飛ばし">{exerciseLabel('一段飛ばし', lang)}</option>
+            <option value="二段飛ばし">{exerciseLabel('二段飛ばし', lang)}</option>
+            <option value="軽め">{exerciseLabel('軽め', lang)}</option>
+            <option value="屋内ジャンプ">{exerciseLabel('屋内ジャンプ', lang)}</option>
+            <option value="休養">{exerciseLabel('休養', lang)}</option>
           </select>
         </div>
-        <p className="filter-result-count">{filteredRecords.length}件</p>
+        <p className="filter-result-count">{t('history.count').replace('{n}', String(filteredRecords.length))}</p>
       </div>
 
       {filteredRecords.length === 0 ? (
-        <p>記録がありません</p>
+        <p>{t('history.noRecords')}</p>
       ) : (
         filteredRecords.map(record => {
           const bestTime = getBestTime(record.exercises);
@@ -155,7 +156,7 @@ const HistoryPage: React.FC = () => {
                         verticalAlign: 'middle',
                       }}
                     >
-                      サンプル
+                      {t('history.sample')}
                     </span>
                   )}
                   <span style={{ marginLeft: '8px', fontSize: '1.2rem' }}>
@@ -164,14 +165,14 @@ const HistoryPage: React.FC = () => {
                   <span className={`badge badge-${record.roadCondition}`} style={{ marginLeft: '8px' }}>
                     {record.roadCondition}
                   </span>
-                  {record.hasPain && <span className="badge-pain">🤕 痛みあり</span>}
+                  {record.hasPain && <span className="badge-pain">{t('history.painBadge')}</span>}
                   {(record.weather === 'rainy' || record.weather === 'light-rain') && (
-                    <span className="badge-rainy-day">🌧️ 雨天実施</span>
+                    <span className="badge-rainy-day">{t('history.rainyBadge')}</span>
                   )}
                 </div>
                 {bestTime && (
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>最速タイム</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('history.bestTime')}</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary)' }}>
                       {bestTime}s
                     </div>
@@ -182,25 +183,25 @@ const HistoryPage: React.FC = () => {
               <div className="exercises-list" style={{ marginBottom: '12px' }}>
                 {record.exercises.map((ex, idx) => (
                   <div key={idx} style={{ fontSize: '0.9rem', marginBottom: '4px' }}>
-                    <strong>{ex.type}</strong>: {ex.sets.map(s => `${s.timeSeconds}s`).join(', ')}
+                    <strong>{exerciseLabel(ex.type, lang)}</strong>: {ex.sets.map(s => `${s.timeSeconds}s`).join(', ')}
                   </div>
                 ))}
               </div>
 
               <div style={{ display: 'flex', gap: '12px', fontSize: '0.85rem', marginBottom: '8px' }}>
                 <div>
-                  強度: <span style={{ fontWeight: 700, color: getScoreColor(record.perceivedExertion) }}>
+                  {t('history.intensity')}: <span style={{ fontWeight: 700, color: getScoreColor(record.perceivedExertion) }}>
                     {record.perceivedExertion}
                   </span>
                 </div>
                 <div>
-                  疲労: <span style={{ fontWeight: 700, color: getScoreColor(record.fatigue) }}>
+                  {t('history.fatigue')}: <span style={{ fontWeight: 700, color: getScoreColor(record.fatigue) }}>
                     {record.fatigue}
                   </span>
                 </div>
                 {record.hasPain && (
                   <div style={{ fontWeight: 700, color: 'var(--color-danger)' }}>
-                    ⚠️ 痛みあり
+                    {t('history.painWarn')}
                   </div>
                 )}
               </div>
