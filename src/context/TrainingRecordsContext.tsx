@@ -8,6 +8,24 @@ import type { TrainingRecord } from '../types';
 
 const STORAGE_KEY = 'shrine-stair-trainer-records';
 const MIGRATION_KEY = 'shrine-stair-trainer-migrated';
+const DELETED_SAMPLES_KEY = 'shrine-stair-trainer-deleted-samples';
+
+function loadDeletedSampleIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_SAMPLES_KEY);
+    return raw ? new Set<string>(JSON.parse(raw)) : new Set<string>();
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function persistDeletedSampleIds(ids: Set<string>): void {
+  try {
+    localStorage.setItem(DELETED_SAMPLES_KEY, JSON.stringify([...ids]));
+  } catch {
+    // Ignore storage failures — the in-memory set still hides the sample for this session.
+  }
+}
 
 /**
  * Heuristic: a write failed because of connectivity (so it should be queued for
@@ -29,6 +47,9 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     typeof navigator === 'undefined' ? true : navigator.onLine,
   );
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  // Sample (`sample-`) records that the user has deleted. Persisted so the
+  // generated May 2026 sample is not re-merged back into the display on reload.
+  const [deletedSampleIds, setDeletedSampleIds] = useState<Set<string>>(loadDeletedSampleIds);
 
   // Sync state if uid changes (e.g. login/logout)
   if (uid !== prevUid) {
@@ -183,12 +204,16 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   const updateRecord = async (record: TrainingRecord) => {
     if (!uid) return;
 
-    // Optimistic update: replace the matching record and keep the list sorted.
-    setRecords(prev =>
-      prev
-        .map(r => (r.id === record.id ? record : r))
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    );
+    // Optimistic upsert: replace the matching record, or add it when it is not
+    // yet in `records`. Editing a sample record (which lives only in the merged
+    // display, not in `records`) persists it as a real record, so it must be
+    // inserted here for the edit to show immediately.
+    setRecords(prev => {
+      const next = prev.some(r => r.id === record.id)
+        ? prev.map(r => (r.id === record.id ? record : r))
+        : [record, ...prev];
+      return next.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    });
 
     try {
       await apiClient.putRecord(record);
@@ -208,6 +233,8 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   const deleteRecord = async (id: string) => {
     if (!uid) return;
 
+    const isSample = id.startsWith('sample-');
+
     // Snapshot for rollback — delete is online-only (the offline queue only
     // supports upserts), so revert the optimistic removal if the request fails.
     let snapshot: TrainingRecord[] = [];
@@ -216,11 +243,35 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
       return prev.filter(r => r.id !== id);
     });
 
+    // A pure generated sample lives only in the merged display, never in
+    // `records`. Tombstone its id so it is not re-merged on reload / regeneration.
+    if (isSample) {
+      setDeletedSampleIds(prev => {
+        const next = new Set(prev).add(id);
+        persistDeletedSampleIds(next);
+        return next;
+      });
+    }
+
+    // A never-persisted sample is not on the server — the local tombstone is
+    // enough, so skip the network call (also keeps sample delete working offline).
+    const wasPersisted = snapshot.some(r => r.id === id);
+    if (isSample && !wasPersisted) return;
+
     try {
       await apiClient.deleteRecord(id);
     } catch (err) {
       console.error('Error deleting record:', err);
       setRecords(snapshot);
+      if (isSample) {
+        // Revert the tombstone so a failed delete does not silently hide the sample.
+        setDeletedSampleIds(prev => {
+          const next = new Set(prev);
+          next.delete(id);
+          persistDeletedSampleIds(next);
+          return next;
+        });
+      }
       setError('記録の削除に失敗しました');
       throw err;
     }
@@ -234,9 +285,11 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   const displayRecords = useMemo(() => {
     if (!uid || loading) return records;
     const realDates = new Set(records.map(r => r.date));
-    const sampleToShow = sampleData.filter(s => !realDates.has(s.date));
+    const sampleToShow = sampleData.filter(
+      s => !realDates.has(s.date) && !deletedSampleIds.has(s.id),
+    );
     return [...records, ...sampleToShow];
-  }, [uid, loading, records]);
+  }, [uid, loading, records, deletedSampleIds]);
 
   return (
     <TrainingRecordsContext.Provider

@@ -231,24 +231,22 @@ const HistoryPage: React.FC = () => {
                 </div>
               )}
 
-              {!record.id.startsWith('sample-') && (
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '12px' }}>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    style={{ minHeight: '44px' }}
-                    onClick={() => setEditingRecord(record)}
-                  >
-                    {t('history.edit')}
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    style={{ minHeight: '44px' }}
-                    onClick={() => handleDelete(record.id)}
-                  >
-                    {t('history.delete')}
-                  </button>
-                </div>
-              )}
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '12px' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  style={{ minHeight: '44px' }}
+                  onClick={() => setEditingRecord(record)}
+                >
+                  {t('history.edit')}
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  style={{ minHeight: '44px' }}
+                  onClick={() => handleDelete(record.id)}
+                >
+                  {t('history.delete')}
+                </button>
+              </div>
             </div>
           );
         })
