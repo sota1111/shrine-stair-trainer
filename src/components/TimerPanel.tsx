@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord } from '../types';
-import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
+import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import { useI18n } from '../i18n/useI18n';
-import { exerciseLabel, weatherLabel, roadLabel, joinExercises } from '../i18n/exerciseLabels';
+import { exerciseLabel, weatherLabel, roadLabel } from '../i18n/exerciseLabels';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -211,13 +211,6 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
           </>
         )}
       </section>
-
-      {isConditionDangerous && (
-        <div className="warning-box" style={{ marginBottom: '16px' }}>
-          <p>{t('record.dangerRoad')}</p>
-          <p>{t('record.altMenu')}: {joinExercises(ALTERNATIVE_EXERCISES, lang)}</p>
-        </div>
-      )}
 
       {confirmed && (
         <>

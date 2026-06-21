@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord, ExerciseEntry } from '../types';
-import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
+import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import { useI18n } from '../i18n/useI18n';
-import { exerciseLabel, weatherLabel, roadLabel, joinExercises } from '../i18n/exerciseLabels';
+import { exerciseLabel, weatherLabel, roadLabel } from '../i18n/exerciseLabels';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -110,13 +110,6 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
 
   return (
     <div className="record-panel">
-      {isConditionDangerous && (
-        <div className="warning-box">
-          <p>{t('record.dangerRoad')}</p>
-          <p>{t('record.altMenu')}: {joinExercises(ALTERNATIVE_EXERCISES, lang)}</p>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit}>
         <section className="card">
           <h3>{t('record.basicInfo')}</h3>
