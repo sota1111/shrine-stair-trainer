@@ -5,12 +5,14 @@ import {
 } from 'recharts';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import { useI18n } from '../i18n/useI18n';
+import { exerciseLabel } from '../i18n/exerciseLabels';
+import type { Lang } from '../i18n/messages';
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import type { TrainingRecord, ExerciseType } from '../types';
 
-const formatMonthLabel = (ym: string): string => {
+const formatMonthLabel = (ym: string, lang: Lang): string => {
   const [y, m] = ym.split('-');
-  return `${y}年${Number(m)}月`;
+  return lang === 'ja' ? `${y}年${Number(m)}月` : `${Number(m)}/${y}`;
 };
 
 // Stable, distinguishable color per training menu for the multi-line time chart.
@@ -26,9 +28,10 @@ const MENU_COLORS: Record<ExerciseType, string> = {
 const FALLBACK_COLORS = ['#1abc9c', '#f1c40f', '#34495e', '#e84393', '#00b894'];
 
 const ChartsPage: React.FC = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { records } = useTrainingRecords();
   const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const weekUnit = t('unit.week');
 
   // Months (YYYY-MM) that actually have records, newest first.
   const availableMonths = useMemo(() => {
@@ -104,13 +107,13 @@ const ChartsPage: React.FC = () => {
       const day = d.getDay();
       const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
       const monday = new Date(d.setDate(diff));
-      const weekKey = `${monday.getMonth() + 1}/${monday.getDate()}週`;
-      
+      const weekKey = `${monday.getMonth() + 1}/${monday.getDate()}${weekUnit}`;
+
       const setsCount = r.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
       weeks[weekKey] = (weeks[weekKey] || 0) + setsCount;
     });
     return Object.entries(weeks).map(([name, count]) => ({ name, count }));
-  }, [records_]);
+  }, [records_, weekUnit]);
 
   // Chart 4 Data: Fatigue
   const fatigueData = useMemo(() => {
@@ -207,9 +210,9 @@ const ChartsPage: React.FC = () => {
       <h2>{t('charts.title')}</h2>
 
       <div className="form-group" style={{ marginBottom: '16px' }}>
-        <label htmlFor="month-select">対象月</label>
+        <label htmlFor="month-select">{t('charts.targetMonth')}</label>
         {availableMonths.length === 0 ? (
-          <p style={{ color: 'var(--color-muted)' }}>記録がありません</p>
+          <p style={{ color: 'var(--color-muted)' }}>{t('charts.noRecords')}</p>
         ) : (
           <select
             id="month-select"
@@ -218,7 +221,7 @@ const ChartsPage: React.FC = () => {
             onChange={(e) => setSelectedMonth(e.target.value)}
           >
             {availableMonths.map((m) => (
-              <option key={m} value={m}>{formatMonthLabel(m)}</option>
+              <option key={m} value={m}>{formatMonthLabel(m, lang)}</option>
             ))}
           </select>
         )}
@@ -226,37 +229,37 @@ const ChartsPage: React.FC = () => {
 
       {analysis && (
         <div className="analysis-card">
-          <div className="analysis-title">✨ 分析レポート</div>
+          <div className="analysis-title">{t('charts.analysisTitle')}</div>
           <div className="analysis-item">
-            前回比: <strong>{analysis.diff > 0 ? `+${analysis.diff.toFixed(1)}` : analysis.diff.toFixed(1)}秒</strong> 
-            ({analysis.diff <= 0 ? '改善' : '悪化'})
+            {t('charts.vsPrev')}: <strong>{analysis.diff > 0 ? `+${analysis.diff.toFixed(1)}` : analysis.diff.toFixed(1)}{t('unit.sec')}</strong>
+            ({analysis.diff <= 0 ? t('charts.improved') : t('charts.worsened')})
           </div>
           <div className="analysis-item">
-            4週間トレンド: <strong>{analysis.trend > 0 ? `+${analysis.trend.toFixed(1)}` : analysis.trend.toFixed(1)}秒</strong>
-            ({analysis.trend <= 0 ? '向上中' : '停滞気味'})
+            {t('charts.trend4w')}: <strong>{analysis.trend > 0 ? `+${analysis.trend.toFixed(1)}` : analysis.trend.toFixed(1)}{t('unit.sec')}</strong>
+            ({analysis.trend <= 0 ? t('charts.trendUp') : t('charts.trendFlat')})
           </div>
           {analysis.fatigueWarning && (
             <div className="analysis-item" style={{ color: 'var(--color-danger)' }}>
-              ⚠️ <strong>疲労警告</strong>: 最近の疲労度が高すぎます。休養を優先してください。
+              ⚠️ <strong>{t('charts.fatigueWarnLabel')}</strong>: {t('charts.fatigueWarnBody')}
             </div>
           )}
           {analysis.painCount > 0 && (
             <div className="analysis-item" style={{ color: 'var(--color-danger)' }}>
-              ⚠️ <strong>痛み警告</strong>: 過去14日間で{analysis.painCount}回の痛みが記録されています。
+              ⚠️ <strong>{t('charts.painWarnLabel')}</strong>: {t('charts.painWarnBody').replace('{n}', String(analysis.painCount))}
             </div>
           )}
           {analysis.dangerousRainy && (
             <div className="analysis-item" style={{ color: 'var(--color-warning)' }}>
-              ⚠️ <strong>安全警告</strong>: 雨天・路面不良時に強度の高いメニューが実施されています。
+              ⚠️ <strong>{t('charts.safetyWarnLabel')}</strong>: {t('charts.safetyWarnBody')}
             </div>
           )}
         </div>
       )}
 
       <div className="chart-container card">
-        <div className="chart-title">メニュー別 最速タイム推移 (秒)</div>
+        <div className="chart-title">{t('charts.menuBestTime')}</div>
         {menuTimeData.menus.length === 0 ? (
-          <p className="chart-summary">タイム記録がありません</p>
+          <p className="chart-summary">{t('charts.noTimeRecords')}</p>
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={menuTimeData.rows}>
@@ -270,7 +273,7 @@ const ChartsPage: React.FC = () => {
                   key={m}
                   type="monotone"
                   dataKey={m}
-                  name={m}
+                  name={exerciseLabel(m, lang)}
                   stroke={MENU_COLORS[m] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length]}
                   strokeWidth={2}
                   connectNulls
@@ -281,67 +284,67 @@ const ChartsPage: React.FC = () => {
         )}
         {dashRecords.length > 0 && (
           <p className="chart-summary">
-            {analysis?.recentBestImproved ? '✅ 直近7日でベスト更新あり' : '📊 直近7日でベスト更新なし'}
+            {analysis?.recentBestImproved ? t('charts.bestUpdatedYes') : t('charts.bestUpdatedNo')}
           </p>
         )}
       </div>
 
       <div className="chart-container card">
-        <div className="chart-title">3本平均タイム推移 (秒)</div>
+        <div className="chart-title">{t('charts.avg3Time')}</div>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={timeData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
             <Tooltip />
-            <Line type="monotone" dataKey="avg" stroke="var(--color-primary-light)" strokeWidth={2} name="平均" />
+            <Line type="monotone" dataKey="avg" stroke="var(--color-primary-light)" strokeWidth={2} name={t('charts.legendAvg')} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <div className="chart-container card">
-        <div className="chart-title">週別本数合計</div>
+        <div className="chart-title">{t('charts.weeklyTotal')}</div>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={weeklyData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="count" fill="var(--color-primary)" name="本数" />
+            <Bar dataKey="count" fill="var(--color-primary)" name={t('charts.legendReps')} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="chart-container card">
-        <div className="chart-title">疲労感推移 (1-10)</div>
+        <div className="chart-title">{t('charts.fatigueTrend')}</div>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={fatigueData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis domain={[0, 10]} />
             <Tooltip />
-            <Line type="monotone" dataKey="fatigue" stroke="var(--color-warning)" name="疲労感" />
+            <Line type="monotone" dataKey="fatigue" stroke="var(--color-warning)" name={t('charts.legendFatigue')} />
           </LineChart>
         </ResponsiveContainer>
         {fatigueData.length > 0 && (
           <p className="chart-summary">
             {(fatigueData.slice(-7).reduce((sum, d) => sum + d.fatigue, 0) / Math.min(fatigueData.slice(-7).length, 7)) > 7
-              ? '⚠️ 直近の疲労感が高め (7+)' 
-              : '✅ 疲労感は安定しています'}
+              ? t('charts.fatigueHigh')
+              : t('charts.fatigueStable')}
           </p>
         )}
       </div>
 
 
       <div className="chart-container card">
-        <div className="chart-title">路面状態別平均最速タイム (秒)</div>
+        <div className="chart-title">{t('charts.roadAvgBest')}</div>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={roadConditionData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
             <Tooltip />
-            <Bar dataKey="avgBest" name="平均最速">
+            <Bar dataKey="avgBest" name={t('charts.legendAvgBest')}>
               {roadConditionData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={
                   entry.name === 'dry' ? 'var(--color-success)' :

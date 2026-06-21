@@ -22,7 +22,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       // The server returns a localized error message; surface it directly.
       const msg = err instanceof Error ? err.message : ''
-      setError(msg || 'ログインに失敗しました')
+      setError(msg || t('login.failed'))
     } finally {
       setLoading(false)
     }
@@ -51,7 +51,7 @@ export default function LoginPage() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="パスワードを入力"
+              placeholder={t('login.passwordPlaceholder')}
               required
             />
           </div>

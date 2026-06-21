@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord, ExerciseEntry } from '../types';
 import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
+import { useI18n } from '../i18n/useI18n';
+import { exerciseLabel, weatherLabel, roadLabel, joinExercises } from '../i18n/exerciseLabels';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -24,6 +26,7 @@ interface RecordPanelProps {
 const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCondition, setRoadCondition }) => {
   const navigate = useNavigate();
   const { addRecord } = useTrainingRecords();
+  const { t, lang } = useI18n();
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<ExerciseEntry[]>([
@@ -109,24 +112,24 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
     <div className="record-panel">
       {isConditionDangerous && (
         <div className="warning-box">
-          <p>⚠️ 路面不良のため一段飛ばし・二段飛ばしは推奨しません</p>
-          <p>代替推奨メニュー: {ALTERNATIVE_EXERCISES.join('、')}</p>
+          <p>{t('record.dangerRoad')}</p>
+          <p>{t('record.altMenu')}: {joinExercises(ALTERNATIVE_EXERCISES, lang)}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
         <section className="card">
-          <h3>📅 基本情報</h3>
+          <h3>{t('record.basicInfo')}</h3>
           <div className="form-group">
-            <label>実施日</label>
+            <label>{t('record.date')}</label>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-              曜日: {calculateDayOfWeek(date)}
+              {t('record.dayOfWeek')}: {calculateDayOfWeek(date)}
             </span>
           </div>
 
           <div className="form-group">
-            <label>天気</label>
+            <label>{t('cond.weather')}</label>
             <div className="quick-select-group">
               {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map(w => (
                 <button
@@ -135,14 +138,14 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
                   className={`quick-select-btn ${weather === w ? 'active' : ''}`}
                   onClick={() => setWeather(w)}
                 >
-                  {w === 'sunny' ? '☀️ 晴' : w === 'cloudy' ? '☁️ 曇' : w === 'rainy' ? '🌧️ 雨' : '🌦️ 小雨'}
+                  {weatherLabel(w, lang)}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="form-group">
-            <label>路面状態</label>
+            <label>{t('cond.road')}</label>
             <div className="quick-select-group">
               {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map(r => (
                 <button
@@ -151,7 +154,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
                   className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
                   onClick={() => setRoadCondition(r)}
                 >
-                  {r === 'dry' ? '🟢 乾燥' : r === 'wet' ? '🔵 湿潤' : r === 'rainy' ? '💧 雨' : '⚠️ 滑る'}
+                  {roadLabel(r, lang)}
                 </button>
               ))}
             </div>
@@ -159,26 +162,26 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
         </section>
 
         <div className="exercises-section" style={{ marginTop: '20px' }}>
-          <h3>種目</h3>
+          <h3>{t('record.exercises')}</h3>
           {exercises.map((ex, exIdx) => (
             <div key={exIdx} className="exercise-entry card" style={{ marginBottom: '16px' }}>
               <div className="form-group">
-                <label>種目名</label>
+                <label>{t('record.exerciseName')}</label>
                 <div className="quick-select-group" style={{ flexWrap: 'wrap' }}>
-                  {EXERCISE_TYPES.map(t => (
+                  {EXERCISE_TYPES.map(type => (
                     <button
-                      key={t}
+                      key={type}
                       type="button"
-                      className={`quick-select-btn ${ex.type === t ? 'active' : ''}`}
-                      onClick={() => handleExerciseTypeChange(exIdx, t)}
+                      className={`quick-select-btn ${ex.type === type ? 'active' : ''}`}
+                      onClick={() => handleExerciseTypeChange(exIdx, type)}
                     >
-                      {t}
+                      {exerciseLabel(type, lang)}
                     </button>
                   ))}
                 </div>
                 {isConditionDangerous && isDangerousExercise(ex.type) && (
                   <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px' }}>
-                    ⚠️ 危険なコンディションです
+                    {t('cond.dangerExercise')}
                   </p>
                 )}
               </div>
@@ -186,7 +189,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
               <div className="sets-list">
                 {ex.sets.map((set, setIdx) => (
                   <div key={setIdx} className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <label style={{ margin: 0, minWidth: '50px' }}>{set.setNumber}本目</label>
+                    <label style={{ margin: 0, minWidth: '50px' }}>{t('record.setN').replace('{n}', String(set.setNumber))}</label>
                     <input
                       type="number"
                       step="0.1"
@@ -194,37 +197,37 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
                       onChange={(e) => handleSetTimeChange(exIdx, setIdx, parseFloat(e.target.value))}
                       style={{ flex: 1, padding: '10px', fontSize: '1rem' }}
                     />
-                    <span style={{ fontSize: '1rem' }}>秒</span>
+                    <span style={{ fontSize: '1rem' }}>{t('record.unitSec')}</span>
                     <button
                       type="button"
                       className="btn btn-danger btn-sm"
                       style={{ minHeight: '44px' }}
                       onClick={() => handleRemoveSet(exIdx, setIdx)}
                     >
-                      削除
+                      {t('record.deleteSet')}
                     </button>
                   </div>
                 ))}
                 <button type="button" className="btn btn-secondary btn-sm" style={{ width: '100%', minHeight: '44px' }} onClick={() => handleAddSet(exIdx)}>
-                  ➕ 本追加
+                  {t('record.addSet')}
                 </button>
               </div>
               <div style={{ marginTop: '12px', textAlign: 'right' }}>
                 <button type="button" className="btn btn-danger btn-sm" style={{ minHeight: '44px' }} onClick={() => handleRemoveExercise(exIdx)}>
-                  🗑️ 種目削除
+                  {t('record.removeExercise')}
                 </button>
               </div>
             </div>
           ))}
           <button type="button" className="btn btn-secondary" onClick={handleAddExercise} style={{ width: '100%', minHeight: '56px' }}>
-            ➕ 新しい種目を追加
+            {t('record.addExercise')}
           </button>
         </div>
 
         <section className="card" style={{ marginTop: '20px' }}>
-          <h3>💪 体感・メモ</h3>
+          <h3>{t('record.feelMemo')}</h3>
           <div className="form-group">
-            <label>主観的強度 (1-10)</label>
+            <label>{t('record.rpe')}</label>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{perceivedExertion}</div>
             <input
               type="range" min="1" max="10"
@@ -235,7 +238,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
           </div>
 
           <div className="form-group">
-            <label>疲労感 (1-10)</label>
+            <label>{t('record.fatigue')}</label>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--color-primary)' }}>{fatigue}</div>
             <input
               type="range" min="1" max="10"
@@ -246,36 +249,36 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
           </div>
 
           <div className="form-group">
-            <label>痛みの有無</label>
+            <label>{t('record.pain')}</label>
             <button
               type="button"
               className={`quick-select-btn ${hasPain ? 'active' : ''}`}
               style={{ width: '100%', justifyContent: 'center', minHeight: '56px' }}
               onClick={() => setHasPain(!hasPain)}
             >
-              {hasPain ? '🤕 痛みあり' : '✅ 痛みなし'}
+              {hasPain ? t('record.painYes') : t('record.painNo')}
             </button>
           </div>
 
           <div className="form-group">
-            <label>メモ</label>
+            <label>{t('record.memo')}</label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               rows={3}
-              placeholder="気づいたことなど"
+              placeholder={t('record.memoPlaceholder')}
               style={{ padding: '12px', fontSize: '1rem' }}
             />
           </div>
 
           {showValidation && !isValid() && (
             <div className="validation-error">
-              ⚠️ 入力内容を確認してください: {!date ? '日付が未入力' : exercises.length === 0 ? '種目が必要です' : ''}
+              {t('record.validation')}: {!date ? t('record.validationNoDate') : exercises.length === 0 ? t('record.validationNoExercise') : ''}
             </div>
           )}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.2rem', minHeight: '64px' }}>
-            記録を保存する
+            {t('record.save')}
           </button>
         </section>
       </form>

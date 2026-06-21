@@ -2,27 +2,38 @@ import React, { useState } from 'react';
 import type { WeatherCondition, RoadCondition, ExerciseType } from '../types';
 import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
 import { useI18n } from '../i18n/useI18n';
+import type { MessageKey } from '../i18n/messages';
+import {
+  exerciseLabel,
+  weatherLabel,
+  roadLabel,
+  weekdayLong,
+  joinExercises,
+} from '../i18n/exerciseLabels';
 
+// Stable definition: the weekday is stored as a JP single-char code and the
+// menu / intensity / notes are message keys, so the displayed text follows the
+// selected language while the danger logic (exerciseType) stays untouched.
 interface MenuDay {
-  day: string;
-  menu: string;
+  dayCode: string;
+  menuKey: MessageKey;
   exerciseType?: ExerciseType;
-  intensity: string;
-  notes: string;
+  intensityKey: MessageKey;
+  notesKey: MessageKey;
 }
 
 const WEEKLY_MENU: MenuDay[] = [
-  { day: '月', menu: '70段ダッシュ × 3本', intensity: '全力', notes: '最速タイム狙い' },
-  { day: '火', menu: '70段 × 1〜2本', intensity: '6〜7割', notes: '回復日' },
-  { day: '水', menu: '二段飛ばし 70段 × 2本', exerciseType: '二段飛ばし', intensity: '8割', notes: '軽い刺激' },
-  { day: '木', menu: '70段ダッシュ × 3本', intensity: '全力', notes: '最速タイム狙い' },
-  { day: '金', menu: '70段 × 1本', intensity: '流す程度', notes: '回復日' },
-  { day: '土', menu: 'スクワットジャンプ 5回×3セット', intensity: '屋内', notes: '休憩30秒' },
-  { day: '日', menu: '完全休養', intensity: '—', notes: 'または公園で軽く' },
+  { dayCode: '月', menuKey: 'weekly.mon.menu', intensityKey: 'weekly.mon.intensity', notesKey: 'weekly.mon.notes' },
+  { dayCode: '火', menuKey: 'weekly.tue.menu', intensityKey: 'weekly.tue.intensity', notesKey: 'weekly.tue.notes' },
+  { dayCode: '水', menuKey: 'weekly.wed.menu', exerciseType: '二段飛ばし', intensityKey: 'weekly.wed.intensity', notesKey: 'weekly.wed.notes' },
+  { dayCode: '木', menuKey: 'weekly.thu.menu', intensityKey: 'weekly.thu.intensity', notesKey: 'weekly.thu.notes' },
+  { dayCode: '金', menuKey: 'weekly.fri.menu', intensityKey: 'weekly.fri.intensity', notesKey: 'weekly.fri.notes' },
+  { dayCode: '土', menuKey: 'weekly.sat.menu', intensityKey: 'weekly.sat.intensity', notesKey: 'weekly.sat.notes' },
+  { dayCode: '日', menuKey: 'weekly.sun.menu', intensityKey: 'weekly.sun.intensity', notesKey: 'weekly.sun.notes' },
 ];
 
 const WeeklyMenuPage: React.FC = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [weather, setWeather] = useState<WeatherCondition>('sunny');
   const [roadCondition, setRoadCondition] = useState<RoadCondition>('dry');
 
@@ -32,18 +43,31 @@ const WeeklyMenuPage: React.FC = () => {
   const isConditionDangerous = isDangerousCondition(weather, roadCondition);
 
   const adjustedMenu = WEEKLY_MENU.map((item) => {
+    const day = weekdayLong(item.dayCode, lang);
+    const intensity = t(item.intensityKey);
+    const notes = t(item.notesKey);
     if (
       isConditionDangerous &&
       item.exerciseType &&
       isDangerousExercise(item.exerciseType)
     ) {
       return {
-        ...item,
-        menu: '軽め（雨天・路面不良のため自動切替）',
-        autoSwitchReason: `雨天または路面不良のため、${item.exerciseType}を軽めメニューへ変更しました`,
+        day,
+        intensity,
+        notes,
+        exerciseType: item.exerciseType,
+        menu: t('menu.autoSwitchedMenu'),
+        autoSwitchReason: t('menu.autoSwitchReason').replace('{type}', exerciseLabel(item.exerciseType, lang)),
       };
     }
-    return { ...item, autoSwitchReason: undefined as string | undefined };
+    return {
+      day,
+      intensity,
+      notes,
+      exerciseType: item.exerciseType,
+      menu: t(item.menuKey),
+      autoSwitchReason: undefined as string | undefined,
+    };
   });
 
   const todayMenu = adjustedMenu[menuIndex];
@@ -53,10 +77,10 @@ const WeeklyMenuPage: React.FC = () => {
       <h2>{t('menu.title')}</h2>
 
       <div className="card" style={{ marginBottom: '16px' }}>
-        <h3 style={{ margin: '0 0 8px 0' }}>本日の天気・路面状態</h3>
+        <h3 style={{ margin: '0 0 8px 0' }}>{t('menu.todayCondition')}</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div className="form-group" style={{ margin: 0 }}>
-            <label>天気</label>
+            <label>{t('cond.weather')}</label>
             <div className="quick-select-group">
               {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map(w => (
                 <button
@@ -65,13 +89,13 @@ const WeeklyMenuPage: React.FC = () => {
                   className={`quick-select-btn ${weather === w ? 'active' : ''}`}
                   onClick={() => setWeather(w)}
                 >
-                  {w === 'sunny' ? '☀️ 晴' : w === 'cloudy' ? '☁️ 曇' : w === 'rainy' ? '🌧️ 雨' : '🌦️ 小雨'}
+                  {weatherLabel(w, lang)}
                 </button>
               ))}
             </div>
           </div>
           <div className="form-group" style={{ margin: 0 }}>
-            <label>路面状態</label>
+            <label>{t('cond.road')}</label>
             <div className="quick-select-group">
               {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map(r => (
                 <button
@@ -80,7 +104,7 @@ const WeeklyMenuPage: React.FC = () => {
                   className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
                   onClick={() => setRoadCondition(r)}
                 >
-                  {r === 'dry' ? '🟢 乾燥' : r === 'wet' ? '🔵 湿潤' : r === 'rainy' ? '💧 雨' : '⚠️ 滑る'}
+                  {roadLabel(r, lang)}
                 </button>
               ))}
             </div>
@@ -90,25 +114,26 @@ const WeeklyMenuPage: React.FC = () => {
 
       {isConditionDangerous && (
         <div className="danger-box">
-          <p style={{ margin: 0, fontWeight: 700 }}>⚠️ 雨天または路面不良のため、高リスク種目が代替メニューへ自動切替されます</p>
-          <p style={{ margin: '4px 0 0 0' }}>代替推奨メニュー: {ALTERNATIVE_EXERCISES.join('、')}</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>{t('menu.autoSwitchNotice')}</p>
+          <p style={{ margin: '4px 0 0 0' }}>{t('menu.altMenu')}: {joinExercises(ALTERNATIVE_EXERCISES, lang)}</p>
         </div>
       )}
 
       {isConditionDangerous && todayMenu.exerciseType && isDangerousExercise(todayMenu.exerciseType) && (
         <div className="danger-box">
-          <strong>🚨 今日のメニューは危険条件です</strong>
+          <strong>{t('menu.dangerTitle')}</strong>
           <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>
-            {todayMenu.exerciseType}は雨天・路面不良時に転倒リスクがあります。
-            代わりに{ALTERNATIVE_EXERCISES.slice(0, 3).join('、')}を選んでください。
+            {t('menu.dangerBody')
+              .replace('{type}', exerciseLabel(todayMenu.exerciseType, lang))
+              .replace('{alts}', joinExercises(ALTERNATIVE_EXERCISES.slice(0, 3), lang))}
           </p>
         </div>
       )}
 
       <div className="card" style={{ borderLeft: '4px solid var(--color-warning)', background: '#fffdf0' }}>
-        <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-warning)' }}>今日の推奨メニュー</h3>
+        <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-warning)' }}>{t('menu.todayRecommended')}</h3>
         <div style={{ fontWeight: 700, fontSize: '1.2rem' }}>{todayMenu.menu}</div>
-        <div style={{ fontSize: '0.9rem', color: 'var(--color-muted)' }}>強度: {todayMenu.intensity} | 約5分 | {todayMenu.notes}</div>
+        <div style={{ fontSize: '0.9rem', color: 'var(--color-muted)' }}>{t('menu.intensity')}: {todayMenu.intensity} | {t('menu.about5min')} | {todayMenu.notes}</div>
         {todayMenu.autoSwitchReason && (
           <div className="warning-box" style={{ marginTop: '8px', padding: '6px 10px', fontSize: '0.8rem' }}>
             ⚠️ {todayMenu.autoSwitchReason}
@@ -119,11 +144,11 @@ const WeeklyMenuPage: React.FC = () => {
       <div className="menu-grid">
         {adjustedMenu.map((item, index) => (
           <div key={index} className={`menu-day-card ${index === menuIndex ? 'today' : ''}`}>
-            <div className="menu-day-label">{item.day}曜日</div>
+            <div className="menu-day-label">{item.day}</div>
             <div className="menu-day-content">
               <strong>{item.menu}</strong>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>強度: {item.intensity}</div>
-              <div className="menu-note">約5分 | {item.notes}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>{t('menu.intensity')}: {item.intensity}</div>
+              <div className="menu-note">{t('menu.about5min')} | {item.notes}</div>
               {item.autoSwitchReason && (
                 <div className="warning-box" style={{ marginTop: '8px', padding: '6px 10px', fontSize: '0.8rem' }}>
                   ⚠️ {item.autoSwitchReason}

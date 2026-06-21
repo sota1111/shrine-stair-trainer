@@ -6,7 +6,7 @@ import { useI18n } from '../i18n/useI18n';
 export default function HomePage() {
   const { records } = useTrainingRecords();
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   // Helper to format timeSeconds to mm:ss
   const formatTime = (seconds: number) => {
@@ -89,7 +89,7 @@ export default function HomePage() {
   // 継続日数
   const streakDays = calculateStreak(records);
 
-  const dateStr = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+  const dateStr = today.toLocaleDateString(lang === 'ja' ? 'ja-JP' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 
   return (
     <div className="home-page">
@@ -117,32 +117,32 @@ export default function HomePage() {
         <div className="summary-grid">
           {/* 2-column grid of summary cards */}
           <div className="summary-card">
-            <div className="summary-label">今週の実施</div>
-            <div className="summary-value">{weekCount}回</div>
+            <div className="summary-label">{t('home.weekCount')}</div>
+            <div className="summary-value">{weekCount}{t('unit.times')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">今月の実施</div>
-            <div className="summary-value">{monthCount}回</div>
+            <div className="summary-label">{t('home.monthCount')}</div>
+            <div className="summary-value">{monthCount}{t('unit.times')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">直近ベストタイム</div>
+            <div className="summary-label">{t('home.recentBest')}</div>
             <div className="summary-value">{bestTimeStr || '-'}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">前回タイム</div>
+            <div className="summary-label">{t('home.lastTime')}</div>
             <div className="summary-value">{lastTimeStr || '-'}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">疲労感平均(7日)</div>
+            <div className="summary-label">{t('home.avgFatigue7')}</div>
             <div className="summary-value">{avgFatigue !== null ? avgFatigue.toFixed(1) : '-'}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">痛みあり(30日)</div>
-            <div className="summary-value">{painCount}回</div>
+            <div className="summary-label">{t('home.painCount30')}</div>
+            <div className="summary-value">{painCount}{t('unit.times')}</div>
           </div>
         </div>
         {streakDays > 0 && (
-          <p className="summary-streak">🔥 継続 {streakDays} 日</p>
+          <p className="summary-streak">{t('home.streak').replace('{n}', String(streakDays))}</p>
         )}
       </div>
     </div>

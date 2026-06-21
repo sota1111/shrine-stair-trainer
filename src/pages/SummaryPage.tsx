@@ -14,11 +14,14 @@ import {
 import { achievementRatio } from '../utils/goals';
 import { useI18n } from '../i18n/useI18n';
 
-const formatTime = (seconds: number | null): string =>
-  seconds === null ? '-' : `${seconds.toFixed(1)}秒`;
+const formatTime = (seconds: number | null, secUnit: string): string =>
+  seconds === null ? '-' : `${seconds.toFixed(1)}${secUnit}`;
 
 const SummaryPage: React.FC = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const secUnit = t('unit.sec');
+  const monthOptionLabel = (m: number) => (lang === 'ja' ? `${m}月` : String(m));
+  const yearOptionLabel = (y: number) => (lang === 'ja' ? `${y}年` : String(y));
   const { records } = useTrainingRecords();
   const { goals, updateGoals } = useGoals();
 
@@ -43,7 +46,13 @@ const SummaryPage: React.FC = () => {
     [records, activeYear, selectedMonth],
   );
   const yearly = useMemo(() => getYearlySummary(records, activeYear), [records, activeYear]);
-  const trend = useMemo(() => getMonthlyTrend(records, activeYear), [records, activeYear]);
+  const trend = useMemo(
+    () => getMonthlyTrend(records, activeYear).map((p) => ({
+      ...p,
+      label: lang === 'ja' ? `${p.month}月` : String(p.month),
+    })),
+    [records, activeYear, lang],
+  );
 
   // Goal progress is always measured against the current calendar month.
   const currentMonthSessions = useMemo(
@@ -67,17 +76,17 @@ const SummaryPage: React.FC = () => {
 
       {/* Streak */}
       <div className="card">
-        <h2>🔥 継続日数</h2>
+        <h2>{t('summary.streakTitle')}</h2>
         <p className="summary-streak" style={{ fontSize: '1.5rem' }}>
-          {streak > 0 ? `${streak} 日連続` : 'まだ連続記録はありません'}
+          {streak > 0 ? t('summary.streakDays').replace('{n}', String(streak)) : t('summary.noStreak')}
         </p>
       </div>
 
       {/* Goal setting + achievement */}
       <div className="card">
-        <h2>🎯 目標設定</h2>
+        <h2>{t('summary.goalTitle')}</h2>
         <div className="form-group">
-          <label htmlFor="monthly-target">今月の目標トレーニング回数</label>
+          <label htmlFor="monthly-target">{t('summary.monthlyTarget')}</label>
           <input
             id="monthly-target"
             className="filter-select"
@@ -88,11 +97,11 @@ const SummaryPage: React.FC = () => {
           />
         </div>
         <p>
-          今月の実施: <strong>{currentMonthSessions}</strong> / {target} 回
-          {achieved && <span style={{ color: 'var(--color-success)' }}> ✅ 達成</span>}
+          {t('summary.thisMonthDone')}: <strong>{currentMonthSessions}</strong> / {target}{t('unit.times')}
+          {achieved && <span style={{ color: 'var(--color-success)' }}> {t('summary.achieved')}</span>}
         </p>
         <div
-          aria-label="達成状況"
+          aria-label={t('summary.achievementStatus')}
           style={{
             background: 'var(--color-border, #e0e0e0)',
             borderRadius: '6px',
@@ -113,9 +122,9 @@ const SummaryPage: React.FC = () => {
 
       {/* Monthly summary */}
       <div className="card">
-        <h2>🗓️ 月間サマリ</h2>
+        <h2>{t('summary.monthlyTitle')}</h2>
         <div className="form-group">
-          <label htmlFor="summary-month">対象月</label>
+          <label htmlFor="summary-month">{t('summary.targetMonth')}</label>
           <select
             id="summary-month"
             className="filter-select"
@@ -123,45 +132,45 @@ const SummaryPage: React.FC = () => {
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <option key={m} value={m}>{m}月</option>
+              <option key={m} value={m}>{monthOptionLabel(m)}</option>
             ))}
           </select>
         </div>
         <div className="summary-grid">
           <div className="summary-card">
-            <div className="summary-label">実施回数</div>
-            <div className="summary-value">{monthly.sessions}回</div>
+            <div className="summary-label">{t('summary.sessions')}</div>
+            <div className="summary-value">{monthly.sessions}{t('unit.times')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">トレーニング日数</div>
-            <div className="summary-value">{monthly.trainingDays}日</div>
+            <div className="summary-label">{t('summary.trainingDays')}</div>
+            <div className="summary-value">{monthly.trainingDays}{t('unit.days')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">合計本数</div>
-            <div className="summary-value">{monthly.totalSets}本</div>
+            <div className="summary-label">{t('summary.totalReps')}</div>
+            <div className="summary-value">{monthly.totalSets}{t('unit.reps')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">ベストタイム</div>
-            <div className="summary-value">{formatTime(monthly.bestTime)}</div>
+            <div className="summary-label">{t('summary.bestTime')}</div>
+            <div className="summary-value">{formatTime(monthly.bestTime, secUnit)}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">疲労感平均</div>
+            <div className="summary-label">{t('summary.avgFatigue')}</div>
             <div className="summary-value">
               {monthly.avgFatigue !== null ? monthly.avgFatigue.toFixed(1) : '-'}
             </div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">痛みあり</div>
-            <div className="summary-value">{monthly.painCount}回</div>
+            <div className="summary-label">{t('summary.painCount')}</div>
+            <div className="summary-value">{monthly.painCount}{t('unit.times')}</div>
           </div>
         </div>
       </div>
 
       {/* Yearly summary + trend chart */}
       <div className="card">
-        <h2>📅 年間サマリ</h2>
+        <h2>{t('summary.yearlyTitle')}</h2>
         <div className="form-group">
-          <label htmlFor="summary-year">対象年</label>
+          <label htmlFor="summary-year">{t('summary.targetYear')}</label>
           <select
             id="summary-year"
             className="filter-select"
@@ -169,38 +178,38 @@ const SummaryPage: React.FC = () => {
             onChange={(e) => setSelectedYear(Number(e.target.value))}
           >
             {years.map((y) => (
-              <option key={y} value={y}>{y}年</option>
+              <option key={y} value={y}>{yearOptionLabel(y)}</option>
             ))}
           </select>
         </div>
         <div className="summary-grid">
           <div className="summary-card">
-            <div className="summary-label">実施回数</div>
-            <div className="summary-value">{yearly.sessions}回</div>
+            <div className="summary-label">{t('summary.sessions')}</div>
+            <div className="summary-value">{yearly.sessions}{t('unit.times')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">トレーニング日数</div>
-            <div className="summary-value">{yearly.trainingDays}日</div>
+            <div className="summary-label">{t('summary.trainingDays')}</div>
+            <div className="summary-value">{yearly.trainingDays}{t('unit.days')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">合計本数</div>
-            <div className="summary-value">{yearly.totalSets}本</div>
+            <div className="summary-label">{t('summary.totalReps')}</div>
+            <div className="summary-value">{yearly.totalSets}{t('unit.reps')}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">年間ベスト</div>
-            <div className="summary-value">{formatTime(yearly.bestTime)}</div>
+            <div className="summary-label">{t('summary.yearlyBest')}</div>
+            <div className="summary-value">{formatTime(yearly.bestTime, secUnit)}</div>
           </div>
         </div>
 
         <div className="chart-container" style={{ marginTop: '12px' }}>
-          <div className="chart-title">月別実施回数の推移</div>
+          <div className="chart-title">{t('summary.monthlyTrend')}</div>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={trend}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="sessions" fill="var(--color-primary)" name="実施回数" />
+              <Bar dataKey="sessions" fill="var(--color-primary)" name={t('summary.legendSessions')} />
             </BarChart>
           </ResponsiveContainer>
         </div>

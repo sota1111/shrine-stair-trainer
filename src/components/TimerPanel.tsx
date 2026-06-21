@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord } from '../types';
 import { isDangerousCondition, isDangerousExercise, ALTERNATIVE_EXERCISES } from '../utils/weatherWarning';
+import { useI18n } from '../i18n/useI18n';
+import { exerciseLabel, weatherLabel, roadLabel, joinExercises } from '../i18n/exerciseLabels';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -13,20 +15,6 @@ const EXERCISE_TYPES: ExerciseType[] = [
   '屋内ジャンプ',
   '休養',
 ];
-
-const WEATHER_LABELS: Record<WeatherCondition, string> = {
-  sunny: '☀️ 晴',
-  cloudy: '☁️ 曇',
-  rainy: '🌧️ 雨',
-  'light-rain': '🌦️ 小雨',
-};
-
-const ROAD_LABELS: Record<RoadCondition, string> = {
-  dry: '🟢 乾燥',
-  wet: '🔵 湿潤',
-  rainy: '💧 雨',
-  slippery: '⚠️ 滑る',
-};
 
 const conditionChipStyle: React.CSSProperties = {
   display: 'inline-flex',
@@ -49,6 +37,7 @@ interface TimerPanelProps {
 const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondition, setRoadCondition }) => {
   const navigate = useNavigate();
   const { addRecord } = useTrainingRecords();
+  const { t, lang } = useI18n();
 
   const [exerciseType, setExerciseType] = useState<ExerciseType>('70段ダッシュ');
   const [confirmed, setConfirmed] = useState(false);
@@ -79,7 +68,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
   };
 
   const handleReset = () => {
-    if (window.confirm('タイムをリセットしますか？')) {
+    if (window.confirm(t('timer.confirmReset'))) {
       setIsRunning(false);
       setElapsedMs(0);
       setStartTime(null);
@@ -88,7 +77,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
   };
 
   const handleDiscard = () => {
-    if (window.confirm('全記録を破棄しますか？')) {
+    if (window.confirm(t('timer.confirmDiscard'))) {
       setIsRunning(false);
       setElapsedMs(0);
       setStartTime(null);
@@ -153,14 +142,14 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
       <section className="card" style={{ marginBottom: '16px' }}>
         {confirmed ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={conditionChipStyle}>{WEATHER_LABELS[weather]}</span>
-            <span style={conditionChipStyle}>{ROAD_LABELS[roadCondition]}</span>
-            <span style={conditionChipStyle}>{exerciseType}</span>
+            <span style={conditionChipStyle}>{weatherLabel(weather, lang)}</span>
+            <span style={conditionChipStyle}>{roadLabel(roadCondition, lang)}</span>
+            <span style={conditionChipStyle}>{exerciseLabel(exerciseType, lang)}</span>
           </div>
         ) : (
           <>
             <div className="form-group">
-              <label>天気</label>
+              <label>{t('cond.weather')}</label>
               <div className="quick-select-group">
                 {(['sunny', 'cloudy', 'rainy', 'light-rain'] as WeatherCondition[]).map((w) => (
                   <button
@@ -169,14 +158,14 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
                     className={`quick-select-btn ${weather === w ? 'active' : ''}`}
                     onClick={() => setWeather(w)}
                   >
-                    {WEATHER_LABELS[w]}
+                    {weatherLabel(w, lang)}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="form-group">
-              <label>路面状態</label>
+              <label>{t('cond.road')}</label>
               <div className="quick-select-group">
                 {(['dry', 'wet', 'rainy', 'slippery'] as RoadCondition[]).map((r) => (
                   <button
@@ -185,29 +174,29 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
                     className={`quick-select-btn ${roadCondition === r ? 'active' : ''}`}
                     onClick={() => setRoadCondition(r)}
                   >
-                    {ROAD_LABELS[r]}
+                    {roadLabel(r, lang)}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="form-group">
-              <label>種目</label>
+              <label>{t('timer.exercise')}</label>
               <div className="quick-select-group" style={{ flexWrap: 'wrap' }}>
-                {EXERCISE_TYPES.map((t) => (
+                {EXERCISE_TYPES.map((type) => (
                   <button
-                    key={t}
+                    key={type}
                     type="button"
-                    className={`quick-select-btn ${exerciseType === t ? 'active' : ''}`}
-                    onClick={() => setExerciseType(t)}
+                    className={`quick-select-btn ${exerciseType === type ? 'active' : ''}`}
+                    onClick={() => setExerciseType(type)}
                   >
-                    {t}
+                    {exerciseLabel(type, lang)}
                   </button>
                 ))}
               </div>
               {isConditionDangerous && isDangerousExercise(exerciseType) && (
                 <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '4px' }}>
-                  ⚠️ 危険なコンディションです
+                  {t('cond.dangerExercise')}
                 </p>
               )}
             </div>
@@ -217,7 +206,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
               style={{ width: '100%', minHeight: '56px', fontSize: '1.2rem', marginTop: '8px' }}
               onClick={() => setConfirmed(true)}
             >
-              決定
+              {t('timer.confirm')}
             </button>
           </>
         )}
@@ -225,18 +214,18 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
 
       {isConditionDangerous && (
         <div className="warning-box" style={{ marginBottom: '16px' }}>
-          <p>⚠️ 路面不良のため一段飛ばし・二段飛ばしは推奨しません</p>
-          <p>代替推奨メニュー: {ALTERNATIVE_EXERCISES.join('、')}</p>
+          <p>{t('record.dangerRoad')}</p>
+          <p>{t('record.altMenu')}: {joinExercises(ALTERNATIVE_EXERCISES, lang)}</p>
         </div>
       )}
 
       {confirmed && (
         <>
           {isRunning && (
-            <p className="timer-set-indicator">第 {recordedSets.length + 1} セット 計測中</p>
+            <p className="timer-set-indicator">{t('timer.setCounting').replace('{n}', String(recordedSets.length + 1))}</p>
           )}
           {!isRunning && elapsedMs === 0 && recordedSets.length > 0 && (
-            <p className="timer-set-indicator">第 {recordedSets.length} セット 完了</p>
+            <p className="timer-set-indicator">{t('timer.setDone').replace('{n}', String(recordedSets.length))}</p>
           )}
 
           <div className="timer-display">
@@ -256,10 +245,10 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
 
             <div className="timer-secondary-row">
               <button className="timer-btn-secondary" onClick={handleReset}>
-                リセット
+                {t('timer.reset')}
               </button>
               <button className="timer-btn-secondary" onClick={handleDiscard}>
-                全破棄
+                {t('timer.discardAll')}
               </button>
             </div>
           </div>
@@ -267,7 +256,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
           <div className="timer-sets-list">
             {recordedSets.map((set) => (
               <div key={set.setNumber} className="timer-set-item">
-                <span>{set.setNumber}本目</span>
+                <span>{t('record.setN').replace('{n}', String(set.setNumber))}</span>
                 <span className="timer-set-time">{set.timeSeconds.toFixed(1)}s</span>
               </div>
             ))}
@@ -275,8 +264,8 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
 
           {recordedSets.length > 0 && (
             <div className="timer-best-time">
-              ベスト: {Math.min(...recordedSets.map(s => s.timeSeconds)).toFixed(1)}s
-              （{recordedSets.length}セット完了）
+              {t('timer.best')}: {Math.min(...recordedSets.map(s => s.timeSeconds)).toFixed(1)}s
+              （{t('timer.setsDone').replace('{n}', String(recordedSets.length))}）
             </div>
           )}
 
@@ -286,16 +275,16 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
               style={{ width: '100%', minHeight: '56px', fontSize: '1.2rem', marginBottom: '20px' }}
               onClick={() => setShowSaveForm(true)}
             >
-              記録として保存
+              {t('timer.saveAsRecord')}
             </button>
           )}
 
           {showSaveForm && (
             <section className="card save-form" style={{ marginTop: '20px' }}>
-              <h3>📋 保存フォーム</h3>
+              <h3>{t('timer.saveForm')}</h3>
 
               <div className="form-group">
-                <label>主観的強度 (RPE: 1-10)</label>
+                <label>{t('timer.rpe')}</label>
                 <div className="rpe-grid">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
                     <button
@@ -311,7 +300,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
               </div>
 
               <div className="form-group">
-                <label>疲労感 (1-10)</label>
+                <label>{t('record.fatigue')}</label>
                 <div className="rpe-grid">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => (
                     <button
@@ -327,24 +316,24 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
               </div>
 
               <div className="form-group">
-                <label>痛みの有無</label>
+                <label>{t('record.pain')}</label>
                 <button
                   type="button"
                   className={`quick-select-btn ${hasPain ? 'active' : ''}`}
                   style={{ width: '100%', justifyContent: 'center' }}
                   onClick={() => setHasPain(!hasPain)}
                 >
-                  {hasPain ? '🤕 痛みあり' : '✅ 痛みなし'}
+                  {hasPain ? t('record.painYes') : t('record.painNo')}
                 </button>
               </div>
 
               <div className="form-group">
-                <label>メモ</label>
+                <label>{t('record.memo')}</label>
                 <textarea
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
                   rows={3}
-                  placeholder="気づいたことなど"
+                  placeholder={t('record.memoPlaceholder')}
                 />
               </div>
 
@@ -353,7 +342,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
                 style={{ width: '100%', minHeight: '64px', fontSize: '1.4rem' }}
                 onClick={handleSave}
               >
-                保存する
+                {t('timer.save')}
               </button>
             </section>
           )}
