@@ -78,6 +78,8 @@ const ChartsPage: React.FC = () => {
       .forEach(r => {
         const key = r.date.substring(5); // MM-DD
         r.exercises.forEach(ex => {
+          // SOT-962: 屋内ジャンプ is excluded from the graph series (still recordable elsewhere).
+          if (ex.type === '屋内ジャンプ') return;
           const times = ex.sets.map(s => s.timeSeconds).filter(t => t > 0);
           if (times.length === 0) return;
           const best = Math.min(...times);
