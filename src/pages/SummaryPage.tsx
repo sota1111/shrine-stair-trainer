@@ -12,6 +12,7 @@ import {
   availableYears,
 } from '../utils/stats';
 import { achievementRatio } from '../utils/goals';
+import AchievementBadges from '../components/AchievementBadges';
 import { useI18n } from '../i18n/useI18n';
 
 const formatTime = (seconds: number | null, secUnit: string): string =>
@@ -80,6 +81,12 @@ const SummaryPage: React.FC = () => {
         <p className="summary-streak" style={{ fontSize: '1.5rem' }}>
           {streak > 0 ? t('summary.streakDays').replace('{n}', String(streak)) : t('summary.noStreak')}
         </p>
+      </div>
+
+      {/* Achievement badges */}
+      <div className="card">
+        <h2>{t('summary.badgesTitle')}</h2>
+        <AchievementBadges records={records} />
       </div>
 
       {/* Goal setting + achievement */}
