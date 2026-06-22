@@ -39,7 +39,6 @@ const ja = {
   'home.painCount30': '痛みあり(30日)',
   'home.streak': '🔥 継続 {n} 日',
 
-  'training.title': '📝 記録・計測',
   'training.timer': '⏱️ 計測',
   'training.manual': '📝 手入力',
 
@@ -260,7 +259,6 @@ const en: Record<MessageKey, string> = {
   'home.painCount30': 'Pain (30d)',
   'home.streak': '🔥 {n}-day streak',
 
-  'training.title': '📝 Record & Measure',
   'training.timer': '⏱️ Timer',
   'training.manual': '📝 Manual',
 

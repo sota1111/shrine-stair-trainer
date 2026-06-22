@@ -16,8 +16,6 @@ const TrainingPage: React.FC = () => {
 
   return (
     <div className="training-page container">
-      <h2>{t('training.title')}</h2>
-
       <div className="training-tabs" role="tablist">
         <button
           type="button"
