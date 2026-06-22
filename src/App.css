@@ -1,27 +1,96 @@
+/*
+ * Design-language renewal (SOT-1019).
+ * Shrine / outdoor visual identity: natural-green primary, vermilion (朱赤,
+ * torii-gate red) accent, and stone-gray neutrals. Every surface already reads
+ * from these tokens, so the dark theme below is a single token remap.
+ */
 :root {
-  --color-primary: #3f7355;
+  --color-primary: #3f7355;       /* 自然グリーン */
   --color-primary-dark: #2f5a42;
   --color-primary-light: #6a9e79;
+  --color-accent: #c14b32;        /* 朱赤 (torii vermilion) — achievements / emphasis */
+  --color-accent-dark: #a23a25;
   --color-warning: #e67e22;
   --color-danger: #e74c3c;
   --color-success: #27ae60;
-  --color-bg: #f4f5f1;
+  --color-bg: #f4f5f1;            /* 石庭グレーがかった生成り */
+  --color-bg-alt: #ebece6;
   --color-card: #ffffff;
   --color-border: #e8e9e3;
-  --color-text: #2c3e50;
-  --color-muted: #7f8c8d;
+  --color-text: #232e26;          /* 高コントラスト (WCAG AA) */
+  --color-muted: #5f6b62;
+  --color-stone: #8a8f86;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(31,45,38,0.08);
   --shadow-md: 0 6px 20px rgba(31,45,38,0.10);
+  color-scheme: light;
+}
+
+/* Dark theme — auto via OS preference, or forced with `.theme-dark` on <html>. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    --color-primary: #5c9c76;
+    --color-primary-dark: #4a8061;
+    --color-primary-light: #7cba94;
+    --color-accent: #e0664a;
+    --color-accent-dark: #c14b32;
+    --color-bg: #161a17;
+    --color-bg-alt: #1e231f;
+    --color-card: #232a25;
+    --color-border: #333a34;
+    --color-text: #e8ece8;
+    --color-muted: #a3ada6;
+    --color-stone: #7c857d;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.55);
+    color-scheme: dark;
+  }
+}
+:root.theme-dark {
+  --color-primary: #5c9c76;
+  --color-primary-dark: #4a8061;
+  --color-primary-light: #7cba94;
+  --color-accent: #e0664a;
+  --color-accent-dark: #c14b32;
+  --color-bg: #161a17;
+  --color-bg-alt: #1e231f;
+  --color-card: #232a25;
+  --color-border: #333a34;
+  --color-text: #e8ece8;
+  --color-muted: #a3ada6;
+  --color-stone: #7c857d;
+  --shadow: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.55);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--color-bg);
   color: var(--color-text);
+}
+
+/* Tabular figures for stats/streaks so numbers line up (proposal 3). */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+
+/*
+ * Tactile button feedback (proposal 6). Press states give a small spring; the
+ * "saved" pulse acknowledges a recorded session. Both respect reduced-motion.
+ */
+.btn:active { transform: scale(0.97); }
+@keyframes shrine-saved-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(193,75,50,0.45); }
+  100% { box-shadow: 0 0 0 14px rgba(193,75,50,0); }
+}
+.saved-pulse { animation: shrine-saved-pulse 0.6s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .btn:active { transform: none; }
+  .saved-pulse { animation: none; }
 }
 
 .app { min-height: 100vh; display: flex; flex-direction: column; }
@@ -111,12 +180,13 @@ body {
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.08s ease-out;
   min-height: 44px;
 }
 .btn:hover { opacity: 0.85; }
 .btn-primary { background: var(--color-primary); color: white; }
-.btn-secondary { background: #ecf0f1; color: var(--color-text); }
+.btn-accent { background: var(--color-accent); color: white; }
+.btn-secondary { background: var(--color-bg-alt); color: var(--color-text); }
 .btn-danger { background: var(--color-danger); color: white; }
 .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
 
