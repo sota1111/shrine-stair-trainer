@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext';
 import { TrainingRecordsProvider } from './context/TrainingRecordsContext';
 import { useAuth } from './context/useAuth';
@@ -39,7 +40,9 @@ function AppLayout() {
           <div className="app-header-actions">
             <LanguageToggle />
             {isAuthenticated && (
-              <button className="logout-btn" onClick={logout}>{t('nav.logout')}</button>
+              <button className="logout-btn" onClick={logout} aria-label={t('nav.logout')} title={t('nav.logout')}>
+                <LogOut size={18} aria-hidden="true" />
+              </button>
             )}
           </div>
         </div>
