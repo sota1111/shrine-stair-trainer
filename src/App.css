@@ -202,6 +202,35 @@ body {
 .badge-rainy { background: #e1d5e7; color: #6a1b9a; }
 .badge-slippery { background: #ffe6cc; color: #e65100; }
 
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.achievement-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-alt);
+}
+.achievement-badge.is-unlocked {
+  background: #fff7e6;
+  border-color: var(--color-accent, #f0a500);
+  box-shadow: 0 1px 4px rgba(240, 165, 0, 0.25);
+}
+.achievement-badge.is-locked {
+  opacity: 0.65;
+  filter: grayscale(0.6);
+}
+.achievement-badge-icon { font-size: 1.6rem; line-height: 1; }
+.achievement-badge-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text); }
+.achievement-badge-status { font-size: 0.75rem; color: var(--color-muted); }
+
 .chart-container { margin-bottom: 24px; }
 .chart-title { font-weight: 700; margin-bottom: 8px; color: var(--color-primary); }
 
