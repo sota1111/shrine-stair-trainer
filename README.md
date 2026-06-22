@@ -11,6 +11,15 @@
 - トレーニング時間: 約5分
 - 実施タイミング: 保育園送迎後
 
+## 技術スタック
+
+- **フロントエンド**: React 19 + TypeScript + Vite 8 + React Router 7 + Recharts + lucide-react
+- **バックエンド**: Node.js + Express（静的 SPA 配信と API を同一サーバで提供 / `server/index.js`）
+- **データ**: Firebase Authentication（照合）+ Firestore（記録の保存・同期）
+- **PWA**: `vite-plugin-pwa` によるインストール可能・オフライン対応（Service Worker / Workbox）
+- **多言語**: 日本語/英語の切り替えに対応（ヘッダーの言語トグル）
+- **テスト/品質**: Vitest（ユニットテスト）+ ESLint + `tsc` 型チェック
+
 ## 起動方法
 
 ```bash
@@ -21,6 +30,18 @@ npm run dev
 ```
 
 ブラウザで http://localhost:5173 にアクセス。
+
+### 開発コマンド
+
+| コマンド | 説明 |
+|---------|------|
+| `npm run dev` | Vite 開発サーバ起動 |
+| `npm run build` | 型チェック（`tsc -b`）+ 本番ビルド |
+| `npm start` | Express サーバ起動（`dist/` 配信 + API。ADC が必要） |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` による型チェック |
+| `npm test` | Vitest によるユニットテスト |
+| `npm run preview` | ビルド結果のプレビュー |
 
 ## 構成とセキュリティ (Updated SOT-743)
 
@@ -124,7 +145,7 @@ bash scripts/deploy-cloudrun.sh
 | 記録入力 | /record | トレーニング記録を入力（ストップウォッチによるタイム計測を内蔵。`/timer` は `/record` にリダイレクト） |
 | 履歴一覧 | /history | 過去の記録一覧（フィルタ機能あり） |
 | グラフ | /charts | メニュー別 最速タイム推移・平均タイム・疲労感等の推移グラフ |
-| サマリ | /summary | サマリ・継続日数・目標設定 |
+| サマリ | /summary | サマリ・継続日数・目標設定・達成バッジ（実施回数/継続日数/総段数のしきい値で付与） |
 | 週間メニュー | /menu | 推奨週間スケジュール・雨天時代替メニュー |
 
 ### スマホ向けナビゲーション

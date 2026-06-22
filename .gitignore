@@ -29,3 +29,6 @@ dist-ssr
 
 .env.local
 *.env
+
+# AI worker scratch artifacts
+docs/ai/
