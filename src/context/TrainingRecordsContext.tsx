@@ -48,7 +48,7 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
   );
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
   // Sample (`sample-`) records that the user has deleted. Persisted so the
-  // generated May 2026 sample is not re-merged back into the display on reload.
+  // generated May–June 2026 sample is not re-merged back into the display on reload.
   const [deletedSampleIds, setDeletedSampleIds] = useState<Set<string>>(loadDeletedSampleIds);
 
   // Sync state if uid changes (e.g. login/logout)
@@ -277,7 +277,7 @@ export function TrainingRecordsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Surface the May 2026 sample data so the UI can always be evaluated, even
+  // Surface the May–June 2026 sample data so the UI can always be evaluated, even
   // after the user has saved some real records. Sample entries are merged in for
   // any date that does not already have a real record, so real data always wins
   // on a collision and is never duplicated. Sample data carries the `sample-`
