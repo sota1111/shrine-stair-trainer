@@ -359,7 +359,7 @@ body {
 .training-tab {
   flex: 1;
   background: #ecf0f1;
-  color: var(--color-text);
+  color: #000;
   border: 2px solid transparent;
   border-radius: var(--radius);
   padding: 12px 8px;
@@ -442,7 +442,7 @@ body {
 
 .timer-btn-secondary {
   background: #ecf0f1;
-  color: var(--color-text);
+  color: #000;
   border: none;
   border-radius: var(--radius);
   padding: 12px 16px;
@@ -470,7 +470,7 @@ body {
 
 .quick-select-btn {
   background: #ecf0f1;
-  color: var(--color-text);
+  color: #000;
   border: 2px solid transparent;
   border-radius: var(--radius);
   padding: 10px 14px;
