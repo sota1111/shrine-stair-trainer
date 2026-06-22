@@ -1,21 +1,24 @@
 import type { TrainingRecord, ExerciseType, WeatherCondition, RoadCondition, ExerciseEntry } from '../types';
 
-const generateSampleData = (): TrainingRecord[] => {
+/**
+ * Generate 28 days of placeholder training records ending at `anchor` (inclusive
+ * range anchor-28 … anchor-1 day). `idOffset` keeps the `sample-` ids unique
+ * across multiple month blocks so they never collide in the merged display.
+ * Returned newest-first.
+ */
+const generateMonthBlock = (anchor: Date, idOffset: number): TrainingRecord[] => {
   const records: TrainingRecord[] = [];
-  // Anchored at the end of May 2026 so the generated 28 days fall within May 2026,
-  // giving reviewers placeholder data to evaluate the UI against.
-  const today = new Date('2026-05-31');
   const dayLabels = ['日', '月', '火', '水', '木', '金', '土'];
 
   for (let i = 28; i >= 1; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
+    const date = new Date(anchor);
+    date.setDate(anchor.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
     const dayOfWeek = dayLabels[date.getDay()];
 
     let weather: WeatherCondition = 'sunny';
     let roadCondition: RoadCondition = 'dry';
-    
+
     // Some rainy days
     if (i % 7 === 3 || i % 10 === 0) {
       weather = i % 2 === 0 ? 'rainy' : 'light-rain';
@@ -44,7 +47,7 @@ const generateSampleData = (): TrainingRecord[] => {
       // i=28 -> base 35s, i=1 -> base 26s
       const baseTime = 26 + (i / 28) * 9;
       const type: ExerciseType = (dayOfWeek === '水') ? '二段飛ばし' : '70段ダッシュ';
-      
+
       exercises.push({
         type,
         sets: [
@@ -56,7 +59,7 @@ const generateSampleData = (): TrainingRecord[] => {
     }
 
     records.push({
-      id: `sample-${i}`,
+      id: `sample-${idOffset + i}`,
       date: dateStr,
       dayOfWeek,
       weather,
@@ -71,6 +74,16 @@ const generateSampleData = (): TrainingRecord[] => {
   }
 
   return records.reverse(); // Newest first
+};
+
+const generateSampleData = (): TrainingRecord[] => {
+  // Two anchored month blocks so reviewers have placeholder data spanning both
+  // May and June 2026. Each block produces 28 days ending the day before its
+  // anchor: May 2026 (anchor 2026-05-31, ids sample-1…sample-28) and June 2026
+  // (anchor 2026-06-30, ids sample-101…sample-128). June (newer) is listed first.
+  const may = generateMonthBlock(new Date('2026-05-31'), 0);
+  const june = generateMonthBlock(new Date('2026-06-30'), 100);
+  return [...june, ...may]; // Newest first across both months
 };
 
 export const sampleData = generateSampleData();
