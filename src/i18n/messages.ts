@@ -194,6 +194,7 @@ const ja = {
 
   'timer.exercise': '種目',
   'timer.confirm': '決定',
+  'timer.reselect': '再選択',
   'timer.setCounting': '第 {n} セット 計測中',
   'timer.setDone': '第 {n} セット 完了',
   'timer.reset': 'リセット',
@@ -413,6 +414,7 @@ const en: Record<MessageKey, string> = {
 
   'timer.exercise': 'Exercise',
   'timer.confirm': 'Confirm',
+  'timer.reselect': 'Re-select',
   'timer.setCounting': 'Set {n} timing…',
   'timer.setDone': 'Set {n} done',
   'timer.reset': 'Reset',

@@ -76,6 +76,14 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
     }
   };
 
+  const handleReselect = () => {
+    // Re-open the selectors without discarding recorded sets / save form.
+    // Stop the timer if it is mid-count so the elapsed value is preserved as-is.
+    setIsRunning(false);
+    setConfirmed(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
   const handleDiscard = () => {
     if (window.confirm(t('timer.confirmDiscard'))) {
       setIsRunning(false);
@@ -145,6 +153,14 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
             <span style={conditionChipStyle}>{weatherLabel(weather, lang)}</span>
             <span style={conditionChipStyle}>{roadLabel(roadCondition, lang)}</span>
             <span style={conditionChipStyle}>{exerciseLabel(exerciseType, lang)}</span>
+            <button
+              type="button"
+              className="quick-select-btn"
+              style={{ marginLeft: 'auto' }}
+              onClick={handleReselect}
+            >
+              {t('timer.reselect')}
+            </button>
           </div>
         ) : (
           <>
