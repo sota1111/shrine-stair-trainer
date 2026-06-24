@@ -224,6 +224,11 @@ body {
   box-shadow: 0 1px 4px rgba(240, 165, 0, 0.25);
 }
 .achievement-badge.is-locked {
+  /* SOT-1225: バッジ全体を減光するとラベル/状態の文字が白背景で灰色に見えるため、
+     減光・グレースケールはアイコンのみに限定し、テキストは濃色のまま読めるようにする。
+     ロック状態は 🔒 アイコンと非ハイライト背景で示す。 */
+}
+.achievement-badge.is-locked .achievement-badge-icon {
   opacity: 0.65;
   filter: grayscale(0.6);
 }
@@ -794,6 +799,14 @@ body {
   .chart-container .recharts-responsive-container {
     min-height: 180px;
   }
+}
+
+/* SOT-1225: グラフ(recharts)の軸目盛りは既定でグレー(#666)の SVG text で描画され、
+   白いカード上で灰色文字になる。fill は presentation attribute なので CSS で上書きできる。
+   var(--color-text) はライト=濃色 / ダーク=明色に自動で切替わるため両モードで適切。 */
+.recharts-text,
+.recharts-cartesian-axis-tick-value {
+  fill: var(--color-text);
 }
 
 .sync-banner {
