@@ -18,7 +18,7 @@
   --color-card: #ffffff;
   --color-border: #e8e9e3;
   --color-text: #232e26;          /* 高コントラスト (WCAG AA) */
-  --color-muted: #5f6b62;
+  --color-muted: #232e26;         /* 白背景に灰色文字を禁止 (SOT-1215): 黒系に統一 */
   --color-stone: #8a8f86;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(31,45,38,0.08);
