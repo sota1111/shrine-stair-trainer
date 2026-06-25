@@ -1,8 +1,15 @@
 /*
  * Design-language renewal (SOT-1019).
  * Shrine / outdoor visual identity: natural-green primary, vermilion (朱赤,
- * torii-gate red) accent, and stone-gray neutrals. Every surface already reads
- * from these tokens, so the dark theme below is a single token remap.
+ * torii-gate red) accent, and stone-gray neutrals. Every surface reads from
+ * these tokens.
+ *
+ * Dark mode was removed (SOT-1165). The app is light-only: many surfaces use
+ * hardcoded light backgrounds (e.g. .analysis-card, .home-today-card, the
+ * unlocked badge, .filter-select, today's menu card) that never remapped to
+ * dark. The leftover `prefers-color-scheme: dark` palette therefore turned
+ * --color-text / --color-muted light gray on those white cards (gray text on
+ * white). SOT-1225: keep a single light palette so text stays dark everywhere.
  */
 :root {
   --color-primary: #3f7355;       /* 自然グリーン */
@@ -24,44 +31,6 @@
   --shadow: 0 1px 3px rgba(31,45,38,0.08);
   --shadow-md: 0 6px 20px rgba(31,45,38,0.10);
   color-scheme: light;
-}
-
-/* Dark theme — auto via OS preference, or forced with `.theme-dark` on <html>. */
-@media (prefers-color-scheme: dark) {
-  :root:not(.theme-light) {
-    --color-primary: #5c9c76;
-    --color-primary-dark: #4a8061;
-    --color-primary-light: #7cba94;
-    --color-accent: #e0664a;
-    --color-accent-dark: #c14b32;
-    --color-bg: #161a17;
-    --color-bg-alt: #1e231f;
-    --color-card: #232a25;
-    --color-border: #333a34;
-    --color-text: #e8ece8;
-    --color-muted: #a3ada6;
-    --color-stone: #7c857d;
-    --shadow: 0 1px 3px rgba(0,0,0,0.5);
-    --shadow-md: 0 8px 24px rgba(0,0,0,0.55);
-    color-scheme: dark;
-  }
-}
-:root.theme-dark {
-  --color-primary: #5c9c76;
-  --color-primary-dark: #4a8061;
-  --color-primary-light: #7cba94;
-  --color-accent: #e0664a;
-  --color-accent-dark: #c14b32;
-  --color-bg: #161a17;
-  --color-bg-alt: #1e231f;
-  --color-card: #232a25;
-  --color-border: #333a34;
-  --color-text: #e8ece8;
-  --color-muted: #a3ada6;
-  --color-stone: #7c857d;
-  --shadow: 0 1px 3px rgba(0,0,0,0.5);
-  --shadow-md: 0 8px 24px rgba(0,0,0,0.55);
-  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
