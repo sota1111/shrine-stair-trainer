@@ -40,7 +40,7 @@ function AppLayout() {
           <div className="app-header-actions">
             <LanguageToggle />
             {isAuthenticated && (
-              <button className="logout-btn" onClick={logout} aria-label={t('nav.logout')} title={t('nav.logout')}>
+              <button className="logout-btn" data-testid="logout-btn" onClick={logout} aria-label={t('nav.logout')} title={t('nav.logout')}>
                 <LogOut size={18} aria-hidden="true" />
               </button>
             )}
