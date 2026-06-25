@@ -100,7 +100,7 @@ export default function HomePage() {
 
         {/* Quick action buttons */}
         <div className="home-quick-actions">
-          <button onClick={() => navigate('/timer')} className="btn btn-primary btn-lg home-action-btn">{t('home.startTimer')}</button>
+          <button data-testid="home-start-timer" onClick={() => navigate('/timer')} className="btn btn-primary btn-lg home-action-btn">{t('home.startTimer')}</button>
           <button onClick={() => navigate('/record')} className="btn btn-secondary btn-lg home-action-btn">{t('home.recordInput')}</button>
           <button onClick={() => navigate('/history')} className="btn btn-secondary btn-lg home-action-btn">{t('home.viewHistory')}</button>
         </div>

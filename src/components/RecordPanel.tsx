@@ -256,6 +256,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
           <div className="form-group">
             <label>{t('record.memo')}</label>
             <textarea
+              data-testid="record-memo"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               rows={3}
@@ -270,7 +271,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.2rem', minHeight: '64px' }}>
+          <button data-testid="record-save" type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.2rem', minHeight: '64px' }}>
             {t('record.save')}
           </button>
         </section>
