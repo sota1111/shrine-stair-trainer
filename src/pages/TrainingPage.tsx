@@ -20,6 +20,7 @@ const TrainingPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          data-testid="tab-timer"
           aria-selected={activeTab === 'timer'}
           className={`training-tab ${activeTab === 'timer' ? 'active' : ''}`}
           onClick={() => setActiveTab('timer')}
@@ -29,6 +30,7 @@ const TrainingPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          data-testid="tab-manual"
           aria-selected={activeTab === 'manual'}
           className={`training-tab ${activeTab === 'manual' ? 'active' : ''}`}
           onClick={() => setActiveTab('manual')}
