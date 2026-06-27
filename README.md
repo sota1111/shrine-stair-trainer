@@ -41,6 +41,7 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` による型チェック |
 | `npm test` | Vitest によるユニットテスト |
+| `npm run e2e` | Playwright による E2E テスト |
 | `npm run preview` | ビルド結果のプレビュー |
 
 ## 構成とセキュリティ (Updated SOT-743)
@@ -244,6 +245,7 @@ bash scripts/deploy-cloudrun.sh
 - Firebase Firestore に保存・同期
 - ログイン中のユーザーごとに `users/{uid}/records/{recordId}` 構造で保存されます
 - 複数デバイス間でのデータ同期に対応
+- オフライン時の書き込みはブラウザの IndexedDB キュー（`src/lib/offlineQueue.ts`）に保持され、接続復帰時に Firestore へ自動同期されます
 - 初回ログイン時、既存の `localStorage` データ（非サンプルデータ）は Firestore へ自動移行されます
 
 ## 今後追加したい機能
