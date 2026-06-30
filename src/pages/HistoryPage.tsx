@@ -153,7 +153,7 @@ const HistoryPage: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <div>
                   <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                    {record.date} ({record.dayOfWeek})
+                    {record.date} ({record.dayOfWeek}){record.time ? ` ${record.time}` : ''}
                   </span>
                   {record.id.startsWith('sample-') && (
                     <span

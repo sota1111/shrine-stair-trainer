@@ -5,6 +5,7 @@ import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord } fr
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import { useI18n } from '../i18n/useI18n';
 import { exerciseLabel, weatherLabel, roadLabel } from '../i18n/exerciseLabels';
+import { jstDateString, jstTimeString, dayOfWeekOf } from '../utils/datetime';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -119,13 +120,12 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
   };
 
   const handleSave = () => {
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    const dateStr = jstDateString();
     const record: TrainingRecord = {
       id: Date.now().toString(),
       date: dateStr,
-      dayOfWeek: days[today.getDay()],
+      dayOfWeek: dayOfWeekOf(dateStr),
+      time: jstTimeString(),
       weather,
       roadCondition,
       exercises: [{ type: exerciseType, sets: recordedSets }],

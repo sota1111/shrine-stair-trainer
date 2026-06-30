@@ -3,6 +3,7 @@ import { useTrainingRecords } from '../hooks/useTrainingRecords';
 import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord, ExerciseEntry } from '../types';
 import { useI18n } from '../i18n/useI18n';
 import { exerciseLabel, weatherLabel, roadLabel } from '../i18n/exerciseLabels';
+import { dayOfWeekOf } from '../utils/datetime';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -19,10 +20,7 @@ interface EditRecordModalProps {
   onClose: () => void;
 }
 
-const calculateDayOfWeek = (dateStr: string) => {
-  const days = ['日', '月', '火', '水', '木', '金', '土'];
-  return days[new Date(dateStr).getDay()];
-};
+const calculateDayOfWeek = (dateStr: string) => dayOfWeekOf(dateStr);
 
 const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose }) => {
   const { updateRecord } = useTrainingRecords();

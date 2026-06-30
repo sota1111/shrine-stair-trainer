@@ -5,6 +5,7 @@ import type { ExerciseType, WeatherCondition, RoadCondition, TrainingRecord, Exe
 import { isDangerousCondition, isDangerousExercise } from '../utils/weatherWarning';
 import { useI18n } from '../i18n/useI18n';
 import { exerciseLabel, weatherLabel, roadLabel } from '../i18n/exerciseLabels';
+import { jstDateString, jstTimeString, dayOfWeekOf } from '../utils/datetime';
 
 const EXERCISE_TYPES: ExerciseType[] = [
   '70段ダッシュ',
@@ -28,7 +29,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
   const { addRecord } = useTrainingRecords();
   const { t, lang } = useI18n();
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(jstDateString());
   const [exercises, setExercises] = useState<ExerciseEntry[]>([
     { type: '70段ダッシュ', sets: [{ setNumber: 1, timeSeconds: 30 }] },
   ]);
@@ -38,10 +39,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
   const [memo, setMemo] = useState('');
   const [showValidation, setShowValidation] = useState(false);
 
-  const calculateDayOfWeek = (dateStr: string) => {
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
-    return days[new Date(dateStr).getDay()];
-  };
+  const calculateDayOfWeek = (dateStr: string) => dayOfWeekOf(dateStr);
 
   const isValid = (): boolean => {
     if (!date) return false;
@@ -93,6 +91,7 @@ const RecordPanel: React.FC<RecordPanelProps> = ({ weather, setWeather, roadCond
       id: Date.now().toString(),
       date,
       dayOfWeek: calculateDayOfWeek(date),
+      time: jstTimeString(),
       weather,
       roadCondition,
       exercises,

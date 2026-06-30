@@ -31,4 +31,6 @@ export interface TrainingRecord {
   hasPain: boolean;
   memo: string;
   createdAt: string;
+  /** Time-of-day (HH:MM, JST) the record/measurement was made. Optional for legacy records. */
+  time?: string;
 }
