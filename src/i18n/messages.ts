@@ -139,7 +139,7 @@ const ja = {
   'menu.autoSwitchReason': '雨天または路面不良のため、{type}を軽めメニューへ変更しました',
 
   // Weekly menu table content (display data, not stored records).
-  'weekly.mon.menu': '70段ダッシュ × 3本',
+  'weekly.mon.menu': '全力ダッシュ × 3本',
   'weekly.mon.intensity': '全力',
   'weekly.mon.notes': '最速タイム狙い',
   'weekly.tue.menu': '70段 × 1〜2本',
@@ -148,7 +148,7 @@ const ja = {
   'weekly.wed.menu': '二段飛ばし 70段 × 2本',
   'weekly.wed.intensity': '8割',
   'weekly.wed.notes': '軽い刺激',
-  'weekly.thu.menu': '70段ダッシュ × 3本',
+  'weekly.thu.menu': '全力ダッシュ × 3本',
   'weekly.thu.intensity': '全力',
   'weekly.thu.notes': '最速タイム狙い',
   'weekly.fri.menu': '70段 × 1本',
@@ -358,7 +358,7 @@ const en: Record<MessageKey, string> = {
   'menu.autoSwitchedMenu': 'Light (auto-switched due to rain / poor road)',
   'menu.autoSwitchReason': 'Switched {type} to a lighter menu due to rain or poor road',
 
-  'weekly.mon.menu': '70-step dash × 3',
+  'weekly.mon.menu': 'All-out dash × 3',
   'weekly.mon.intensity': 'All-out',
   'weekly.mon.notes': 'Aim for best time',
   'weekly.tue.menu': '70 steps × 1–2',
@@ -367,7 +367,7 @@ const en: Record<MessageKey, string> = {
   'weekly.wed.menu': 'Skip-two 70 steps × 2',
   'weekly.wed.intensity': '80%',
   'weekly.wed.notes': 'Light stimulus',
-  'weekly.thu.menu': '70-step dash × 3',
+  'weekly.thu.menu': 'All-out dash × 3',
   'weekly.thu.intensity': 'All-out',
   'weekly.thu.notes': 'Aim for best time',
   'weekly.fri.menu': '70 steps × 1',

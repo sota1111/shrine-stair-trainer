@@ -7,7 +7,7 @@ import type { Lang } from './messages';
 
 const EXERCISE_LABELS: Record<Lang, Record<ExerciseType, string>> = {
   ja: {
-    '70段ダッシュ': '70段ダッシュ',
+    '70段ダッシュ': '全力ダッシュ',
     '一段ずつ': '一段ずつ',
     '一段飛ばし': '一段飛ばし',
     '二段飛ばし': '二段飛ばし',
@@ -16,7 +16,7 @@ const EXERCISE_LABELS: Record<Lang, Record<ExerciseType, string>> = {
     '休養': '休養',
   },
   en: {
-    '70段ダッシュ': '70-step dash',
+    '70段ダッシュ': 'All-out dash',
     '一段ずつ': 'Step by step',
     '一段飛ばし': 'Skip one step',
     '二段飛ばし': 'Skip two steps',
