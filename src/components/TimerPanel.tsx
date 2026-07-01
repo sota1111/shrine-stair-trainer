@@ -17,6 +17,9 @@ const EXERCISE_TYPES: ExerciseType[] = [
   '休養',
 ];
 
+// 休養はタイム計測の対象外。決定後はタイマーを出さず、そのまま保存フォーム（記録ボタン）を表示する。
+const REST_TYPE: ExerciseType = '休養';
+
 const conditionChipStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
@@ -41,6 +44,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
   const { t, lang } = useI18n();
 
   const [exerciseType, setExerciseType] = useState<ExerciseType>('70段ダッシュ');
+  const isRest = exerciseType === REST_TYPE;
   const [confirmed, setConfirmed] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -230,6 +234,8 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
 
       {confirmed && (
         <>
+          {!isRest && (
+            <>
           {isRunning && (
             <p className="timer-set-indicator">{t('timer.setCounting').replace('{n}', String(recordedSets.length + 1))}</p>
           )}
@@ -287,11 +293,14 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
               {t('timer.saveAsRecord')}
             </button>
           )}
+            </>
+          )}
 
-          {showSaveForm && (
+          {(showSaveForm || isRest) && (
             <section className="card save-form" style={{ marginTop: '20px' }}>
               <h3>{t('timer.saveForm')}</h3>
 
+              {!isRest && (
               <div className="form-group">
                 <label>{t('timer.rpe')}</label>
                 <div className="rpe-grid">
@@ -307,6 +316,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({ weather, setWeather, roadCondit
                   ))}
                 </div>
               </div>
+              )}
 
               <div className="form-group">
                 <label>{t('record.fatigue')}</label>
